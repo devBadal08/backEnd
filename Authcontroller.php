@@ -8,7 +8,6 @@ use App\Models\user;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 
-
 class Authcontroller extends Controller
 {
     public function register(Request $request)
