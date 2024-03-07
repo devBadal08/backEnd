@@ -1,13 +1,18 @@
 <?php
 
-use App\Http\Controllers\API\Authcontroller;
-use App\Http\Controllers\API\PasswordresetRequestcontroller;
-use App\Http\Controllers\API\changeoldpasswordcontroller;
 use App\Http\Controllers\API\Usercontroller;
 use App\Http\Controllers\PostController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use Symfony\Component\Mailer\Messenger\SendEmailMessage;
+use App\Http\Controllers\API\NewPasswordController;
+use App\Http\Controllers\API\PasswordResetRequestController;
+use App\Http\Controllers\API\AdminController;
+use App\Http\Controllers\API\ManagerController;
+
+use App\Http\Controllers\Api\{
+    LoginController,
+    RegisterController
+};
 
 /*
 |--------------------------------------------------------------------------
@@ -20,41 +25,59 @@ use Symfony\Component\Mailer\Messenger\SendEmailMessage;
 |
 */
 
-ini_set('display_errors', '1');
-ini_set('display_startup_errors', '1');
-error_reporting(E_ALL);
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
-
-Route::controller(Authcontroller::class)->group(function () {
-    Route::post('login', 'login');
+/*
+Route::controller(Authcontroller::class)->group(function(){
     Route::post('register', 'register');
-});
-Route::post('reset-password', [changeoldpasswordcontroller::class, 'reset']);
-Route::post('reset-link', [PasswordresetRequestcontroller::class, 'sendEmail']);
+    Route::post('login','login');
+}); */
 
-Route::controller(UserController::class)->group(function () {
-    Route::get('users', 'index');
-    Route::get('/{id}/show', 'show');
-    Route::get('/{id}/edit', 'edit');
-    Route::post('/{id}/update', 'update');
-    Route::delete('/{id}/delete', 'destroy');
-});
+Route::post('reset-link', [PasswordResetRequestController::class, 'sendEmail']);
+Route::post('reset-password', [NewPasswordController::class, 'reset']);
 
-Route::apiResource('posts', PostController::class);
+Route::get('users', [UserController::class, 'index']);
+Route::get('/{id}/edit', [UserController::class, 'edit']);
+Route::middleware('auth:sanctum')->post('/{id}/update', [UserController::class, 'update']);
+Route::get('/{id}/show', [UserController::class, 'show']);
+Route::delete('/{id}/delete', [UserController::class, 'destroy']);
 
+// Route::apiResource('posts',PostController::class);
 
-
-
-
-
-
-// Route::put('edit-profile',[Usercontroller::class,'edit']);
-//Route::post('user-update',[UserController::class,'update']);
 // Route::get('posts',[PostController::class,'index']);
 // Route::post('posts',[PostController::class,'store']);
+// Route::get('posts/{post}',[PostController::class,'show']);
 // Route::put('posts/{post}',[PostController::class,'update']);
 // Route::delete('posts',[PostController::class,'destroy']);
-//Route::post('demo', [changeoldpasswordcontroller::class,'passwordResetProcess']);
-// Route::post('ResetLink', [PasswordresetRequestcontroller::class,'sendEmail']);
+
+// Route::get('posts/{post}',[PostController::class,'show']);
+
+Route::post('login', [LoginController::class, 'login']);
+Route::post('register', [RegisterController::class, 'register']);
+
+Route::group(['middleware' => ['auth:sanctum', 'roles:admin']], function () {
+    // Route::get('users', function () {
+    // dd('usrs list');
+    Route::get('users', [UserController::class, 'index']);
+
+    // });
+});
+
+// Route::group(['middleware'=>['auth','roles:admin,user']],function(){
+// });
+
+// Route::controller(AdminController::class)->group(function(){
+//     Route::get('list_mgr', 'index');
+//     Route::post('store_mgr','store');
+// });
+
+Route::controller(ManagerController::class)->group(function(){
+    Route::get('manager', 'index');
+    Route::post('manager/store','store');
+    
+    
+    // manager/edit
+    // manager/update
+    // manager/delete
+});

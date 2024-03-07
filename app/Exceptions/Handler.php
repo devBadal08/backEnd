@@ -28,14 +28,14 @@ class Handler extends ExceptionHandler
         });
     }
     public function render($request, Throwable $e){
-        return parent::render($request, $e);
         // if($request->is('api/*')){
         //     return response()->json([
-        //         'message' => 'Record not found'
+        //         'message' => 'Record not found!'
 
         //     ],400);
         // }
-     }
+        return parent::render($request, $e);
+    }
     
     
 }
