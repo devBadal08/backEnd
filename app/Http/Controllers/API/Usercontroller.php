@@ -15,12 +15,12 @@ class UserController extends Controller
      * Display a listing of the resource.
      */
 
-     public function index()
+    public function index()
     {
         $users = User::where('created_by', auth()->user()->id)->get();
+        return response()->json($users);
         $users = User::paginate(2);
 
-        return response()->json($users);
     }
     /*
     public function index()
@@ -32,7 +32,7 @@ class UserController extends Controller
         return response()->json($users);
     } */
 
-    
+
 
     /**
      * Show the form for creating a new resource.
@@ -48,9 +48,9 @@ class UserController extends Controller
     public function store(Request $request)
     {
         // dd($request->user()->id);
-         // Permission for user
-         $user_list = Permission::where(['name'=>'user.list'])->first();
-        
+        // Permission for user
+        $user_list = Permission::where(['name' => 'user.list'])->first();
+
         $user = new User();
 
         //validation
@@ -58,9 +58,10 @@ class UserController extends Controller
             'first_name' => 'required|string|max:255',
             'email' => 'required|email|unique:users',
             'password' => 'required|string|min:8',
-            'c_password' => 'required|same:password' // Add password validation
+            'c_password' => 'required|same:password', // Add password validation
+            'image' => 'required|mimes:jpeg,jpg,png,gif|max:500' //image validation
         ]);
-    
+
         if ($validator->fails()) {
             return response()->json($validator->errors(), 422);
         }
@@ -68,6 +69,11 @@ class UserController extends Controller
         $user->first_name = $request->first_name;
         $user->email = $request->email;
         $user->password = bcrypt($request->password);
+        //UPLOAD IMAGE
+        $imageName = time() . '.' . $request->image->extension();
+        $request->image->move(public_path('images/users'), $imageName);
+        // print_r($img); exit;
+        $user->image = $imageName;   //store image name
         $user->role = 'user';
         $user->created_by = Auth::id();
         $user->save();
@@ -118,10 +124,16 @@ class UserController extends Controller
             'last_name' => 'required|string|max:255',
             'phone' => 'required',
             'password' => 'nullable',
-            'c_password' => 'same:password'
+            'c_password' => 'same:password',
+            'image' => 'nullable|mimes:jpeg,jpg,png,gif|max:500'
 
             // Add other fields as needed
         ]);
+        if (isset($request->image)) {
+            $imageName = time() . '.' . $request->image->extension();
+            $request->image->move(public_path('images/users'), $imageName);
+            $user->image = $imageName;
+        }
         // print_r($request); exit;
         if ($validator->fails()) {
             $response = [

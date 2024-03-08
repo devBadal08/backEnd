@@ -22,6 +22,7 @@ return new class extends Migration
             $table->string('phone',12)->nullable();
             // $table->int('alt_phone');
             $table->string('email')->unique();
+            $table->string('image');
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             // $table->boolean('is_admin')->nullable();

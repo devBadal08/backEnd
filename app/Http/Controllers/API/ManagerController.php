@@ -37,7 +37,8 @@ class ManagerController extends Controller
             'first_name' => 'required|string|max:255',
             'email' => 'required|email|unique:users',
             'password' => 'required|string|min:8',
-            'c_password' => 'required|same:password' // Add password validation
+            'c_password' => 'required|same:password', // Add password validation
+            'image' => 'required|mimes:jpeg,jpg,png,gif|max:500' //image validation
         ]);
     
         if ($validator->fails()) {
@@ -47,6 +48,11 @@ class ManagerController extends Controller
         $manager->first_name = $request->first_name;
         $manager->email = $request->email;
         $manager->password = bcrypt($request->password);
+        //UPLOAD IMAGE
+        $imageName = time() . '.' . $request->image->extension();
+        $request->image->move(public_path('images/managers'), $imageName);
+        // print_r($img); exit;
+        $manager->image = $imageName;   //store image name
         $manager->role = 'manager';
         $manager->save();
 
@@ -90,11 +96,19 @@ class ManagerController extends Controller
             'first_name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
             'phone' => 'required',
+            'email' => 'nullable',
             'password' => 'nullable',
-            'c_password' => 'same:password'
-
+            'c_password' => 'same:password',
+            'image' => 'required|mimes:jpeg,jpg,png,gif|max:500' //image validation
             // Add other fields as needed
         ]);
+
+        if (isset($request->image)) {
+            $imageName = time() . '.' . $request->image->extension();
+            $request->image->move(public_path('images/managers'), $imageName);
+            $manager->image = $imageName;
+        }
+
         // print_r($request); exit;
         if ($validator->fails()) {
             $response = [
