@@ -8,7 +8,6 @@ use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Spatie\Permission\Models\Permission;
 use Illuminate\Support\Facades\Validator;
-use PhpParser\Node\Expr\Print_;
 
 class UserController extends Controller
 {
@@ -16,10 +15,23 @@ class UserController extends Controller
      * Display a listing of the resource.
      */
 
-    public function index()
+    public function index(Request $request)
     {
-        $users = User::where('created_by', auth()->user()->id)->paginate(1);
+
+        $users = User::where('created_by', auth()->user()->id)->paginate(10);
         return response()->json($users);
+
+        // $perPage = $request->query('per_page', 10);
+        // $minAge = $request->query('min_age');
+        // $gender = $request->query('gender');
+        // $village = $request->query('village');
+
+        // $users = User::filterByAge($minAge)
+        //     ->filterByGender($gender)
+        //     ->filterByVillage($village)
+        //     ->paginate($perPage);
+
+        // return response()->json($users);
     }
 
     /**
@@ -44,6 +56,7 @@ class UserController extends Controller
         //validation
         $validator = Validator::make($request->all(), [
             'first_name' => 'required|string|max:255',
+            'last_name' => 'required|string|max:255',
             'email' => 'required|email|unique:users',
             'password' => 'required|string|min:8',
             'c_password' => 'required|same:password', // Add password validation
@@ -55,6 +68,7 @@ class UserController extends Controller
         }
         //store user
         $user->first_name = $request->first_name;
+        $user->last_name = $request->last_name;
         $user->email = $request->email;
         $user->password = bcrypt($request->password);
         //UPLOAD IMAGE
@@ -97,16 +111,61 @@ class UserController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, $id)
+    public function user_update(Request $request,$id)  // This is the function to update the user by Manager
     {
-        
+        $user = auth()->user();
+
+        $validator = Validator::make($request->all(), [
+            'first_name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users',
+            'password' => 'required|string|min:8',
+            'c_password' => 'required|same:password', // Add password validation
+            'image' => 'required|mimes:jpeg,jpg,png,gif|max:500' //image validation
+        ]);
+
+        if ($validator->fails()) {
+            $response = [
+                'success' => false,
+                'message' => $validator->errors()
+            ];
+            return response()->json($response, 400);
+        }
+
+        $user = User::find($id);
+        $postParams = [
+            'first_name' => $request->first_name,
+            'last_name' => 'required|string|max:255',
+            'password' => 'nullable|min:8',
+            'c_password' => 'same:password',
+            'image' => 'nullable|mimes:jpeg,jpg,png,gif|max:500',
+        ];
+
+        if (isset($request->image)) {
+            $imageName = time() . '.' . $request->image->extension();
+            $request->image->move(public_path('images/users'), $imageName);
+            $user->image = $imageName;
+        }
+
+        if ($request->has('password')) {
+            $user->password = bcrypt($request->password);
+        }
+
+        $user->update($postParams);
+
+        return response()->json($user, 200);
+
+    }
+
+    public function update(Request $request, $id)  //This is the function to update the user by user itself
+    {
+
         // print_r($request->all());die();
         $user = auth()->user();
         // dd($user);
         // echo "here"; exit;
         // print_r($user); exit;
 
-       
+
         // Define validation rules considering required password
         $validator = Validator::make($request->all(), [
 
@@ -118,10 +177,13 @@ class UserController extends Controller
             'gender' => 'required',
             'phone' => 'required|numeric|digits:10',
             'alt_phone' => 'nullable|numeric|digits:10',
-            'password' => 'nullable',
+            'password' => 'nullable|min:8',
             'c_password' => 'same:password',
             'username' => 'required',
             'marital_status' => 'required',
+            'village' => 'nullable',
+            'city' => 'nullable',
+            'state' => 'nullable',
             'height' => 'nullable',
             'weight' => 'nullable',
             'hobbies' => 'nullable',
@@ -131,7 +193,7 @@ class UserController extends Controller
             'education' => 'nullable',
             // Add other fields as needed
         ]);
-        
+
         $dob = $request->dob;
         // print_r($request); exit;
         if ($validator->fails()) {
@@ -151,8 +213,6 @@ class UserController extends Controller
             'gender' => $request->gender,
             'phone' => $request->phone,
             'alt_phone' => $request->alt_phone,
-            'password' => $request->password,
-            'c_password' => $request->c_password,
             'username' => $request->username,
             'marital_status' => $request->marital_status,
             'height' => $request->height,
@@ -160,15 +220,20 @@ class UserController extends Controller
             'hobbies' => $request->hobbies,
             'about_self' => $request->about_self,
             'about_job' => $request->about_job,
-            // 'image' => $request->image,as
+            // 'image' => $request->image,
             'education' => $request->education,
         ];
-        $age = \Carbon\Carbon::parse($dob)->diff(\Carbon\Carbon::now())->format('%y years');
+
+        $age = \Carbon\Carbon::parse($dob)->diff(\Carbon\Carbon::now())->format('%y');
         $postParams['age'] = $age;
         if (isset($request->image)) {
             $imageName = time() . '.' . $request->image->extension();
             $request->image->move(public_path('images/users'), $imageName);
             $user->image = $imageName;
+        }
+
+        if ($request->has('password')) {
+            $user->password = bcrypt($request->password);
         }
 
         $user->update($postParams);

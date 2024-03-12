@@ -22,6 +22,9 @@ return new class extends Migration
             $table->string('phone',12)->nullable();
             $table->int('alt_phone')->nullable();
             $table->string('email')->unique();
+            $table->string('village')->nullable();
+            $table->string('city')->nullable();
+            $table->string('state')->nullable();
             $table->string('image')->nullable();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');

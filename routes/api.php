@@ -49,6 +49,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
         Route::get('{id}/user/edit', 'edit');
         Route::post('user/store', 'store');
         Route::post('{id}/user/update', 'update');
+        Route::post('{id}/user/userupdate', 'user_update');
         Route::post('{id}/user/show', 'show');
         Route::delete('{id}/user/delete', 'destroy');
     });
@@ -60,6 +61,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
         Route::get('{id}/manager/edit', 'edit');
         Route::post('manager/store', 'store');
         Route::post('{id}/manager/update', 'update');
+        Route::post('{id}/manager/managerupdate', 'manager_update');
         Route::post('{id}/manager/show', 'show');
     });
 });

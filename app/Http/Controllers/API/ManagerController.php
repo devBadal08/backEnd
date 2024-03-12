@@ -14,7 +14,7 @@ class ManagerController extends Controller
 {
     public function index()
     {
-        $managers = User::where('role', 'manager')->paginate(1);
+        $managers = User::where('role', 'manager')->paginate(10);
         return response()->json($managers);
     }
 
@@ -33,6 +33,7 @@ class ManagerController extends Controller
         //validation
         $validator = Validator::make($request->all(), [
             'first_name' => 'required|string|max:255',
+            'last_name' => 'required|string|max:255',
             'email' => 'required|email|unique:users',
             'password' => 'required|string|min:8',
             'c_password' => 'required|same:password', // Add password validation
@@ -44,6 +45,7 @@ class ManagerController extends Controller
         }
         //store manager
         $manager->first_name = $request->first_name;
+        $manager->last_name = $request->last_name;
         $manager->email = $request->email;
         $manager->password = bcrypt($request->password);
         //UPLOAD IMAGE
@@ -80,7 +82,53 @@ class ManagerController extends Controller
         return response()->json($manager);
     }
 
-    public function update(Request $request, $id)
+    // Manager updated by admin
+    public function manager_update(Request $request,$id)  
+    {
+        $manager = auth()->user();
+
+        $validator = Validator::make($request->all(), [
+            'first_name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users',
+            'password' => 'required|string|min:8',
+            'c_password' => 'required|same:password', // Add password validation
+            'image' => 'required|mimes:jpeg,jpg,png,gif|max:500' //image validation
+        ]);
+
+        if ($validator->fails()) {
+            $response = [
+                'success' => false,
+                'message' => $validator->errors()
+            ];
+            return response()->json($response, 400);
+        }
+
+        $manager = User::find($id);
+        $postParams = [
+            'first_name' => $request->first_name,
+            'last_name' => 'required|string|max:255',
+            'password' => 'nullable|min:8',
+            'c_password' => 'same:password',
+            'image' => 'nullable|mimes:jpeg,jpg,png,gif|max:500',
+        ];
+
+        if (isset($request->image)) {
+            $imageName = time() . '.' . $request->image->extension();
+            $request->image->move(public_path('images/managers'), $imageName);
+            $manager->image = $imageName;
+        }
+
+        if ($request->has('password')) {
+            $manager->password = bcrypt($request->password);
+        }
+
+        $manager->update($postParams);
+
+        return response()->json($manager, 200);
+
+    }
+
+    public function update(Request $request, $id)  //Manager Update itself
     {
 
         $manager = auth()->user();
@@ -102,22 +150,18 @@ class ManagerController extends Controller
             'c_password' => 'same:password',
             'username' => 'required',
             'marital_status' => 'required',
+            'village' => 'nullable',
+            'city' => 'nullable',
+            'state' => 'nullable',
             'height' => 'nullable',
             'weight' => 'nullable',
             'hobbies' => 'nullable',
             'about_self' => 'nullable',
             'about_job' => 'nullable',
             'image' => 'nullable|mimes:jpeg,jpg,png,gif|max:500', //image validation
-            'education' => 'nullable', 
+            'education' => 'nullable',
             // Add other fields as needed
         ]);
-
-        if (isset($request->image)) {
-            $imageName = time() . '.' . $request->image->extension();
-            $request->image->move(public_path('images/managers'), $imageName);
-            $manager->image = $imageName;
-        }
-
         $dob = $request->dob;
 
         // print_r($request); exit;
@@ -139,8 +183,6 @@ class ManagerController extends Controller
             'gender' => $request->gender,
             'phone' => $request->phone,
             'alt_phone' => $request->alt_phone,
-            'password' => $request->password,
-            'c_password' => $request->c_password,
             'username' => $request->username,
             'marital_status' => $request->marital_status,
             'height' => $request->height,
@@ -153,6 +195,17 @@ class ManagerController extends Controller
         ];
         $age = \Carbon\Carbon::parse($dob)->diff(\Carbon\Carbon::now())->format('%y years');
         $postParams['age'] = $age;
+
+        if (isset($request->image)) {
+            $imageName = time() . '.' . $request->image->extension();
+            $request->image->move(public_path('images/managers'), $imageName);
+            $manager->image = $imageName;
+        }
+
+        if ($request->has('password')) {
+            $manager->password = bcrypt($request->password);
+        }
+
         $manager->update($postParams);
 
         return response()->json($manager, 200);
