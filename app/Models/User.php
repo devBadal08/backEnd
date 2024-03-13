@@ -8,6 +8,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
+use Carbon\Carbon;
 
 class User extends Authenticatable
 {
@@ -46,12 +47,31 @@ class User extends Authenticatable
 
 
     ];
-    /*
 
     public function scopeFilterByAge($query, $minAge)
     {
         if ($minAge) {
             return $query->where('age', '>=', $minAge);
+        }
+        return $query;
+    }
+
+    // public function getBirthYearAttribute()
+    // {
+    //     return Carbon::parse($this->dob)->year; // Replace 'date_of_birth' with your actual column name
+    // }
+
+    // public function scopeFilterByBirthYear($query, $birthYear)
+    // {
+    //     if ($birthYear) {
+    //         return $query->where('birth_year', $birthYear);
+    //     }
+    //     return $query;
+    // }
+    public function scopeFilterByBirthYear($query, $birthYear)
+    {
+        if ($birthYear) {
+            return $query->whereYear('dob', $birthYear);
         }
         return $query;
     }
@@ -79,7 +99,7 @@ class User extends Authenticatable
 
         return $query->where($filters);
     }
-*/
+
 
     /**
      * The attributes that should be hidden for serialization.

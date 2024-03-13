@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\{
     LoginController,
     PasswordResetRequestController,
     NewPasswordController,
+    AdminController,
     ManagerController,
     Usercontroller,
 
@@ -45,6 +46,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
 
     //Routes for user
     Route::controller(UserController::class)->group(function () {
+        Route::get('allusers', 'listUsers');
         Route::get('users', 'index');
         Route::get('{id}/user/edit', 'edit');
         Route::post('user/store', 'store');
@@ -64,4 +66,9 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
         Route::post('{id}/manager/managerupdate', 'manager_update');
         Route::post('{id}/manager/show', 'show');
     });
+
+    //Routes for admin to get all data
+
+Route::get('allusers', [AdminController::class, 'index']);
+
 });

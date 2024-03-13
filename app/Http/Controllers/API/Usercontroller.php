@@ -8,6 +8,7 @@ use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Spatie\Permission\Models\Permission;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 
 class UserController extends Controller
 {
@@ -15,23 +16,42 @@ class UserController extends Controller
      * Display a listing of the resource.
      */
 
+    public function listUsers()
+    {
+        $users = User::where('role', 'user')->get();
+
+        return response()->json($users);
+    }
+
     public function index(Request $request)
     {
 
+
         $users = User::where('created_by', auth()->user()->id)->paginate(10);
-        return response()->json($users);
-
-        // $perPage = $request->query('per_page', 10);
-        // $minAge = $request->query('min_age');
-        // $gender = $request->query('gender');
-        // $village = $request->query('village');
-
-        // $users = User::filterByAge($minAge)
-        //     ->filterByGender($gender)
-        //     ->filterByVillage($village)
-        //     ->paginate($perPage);
-
         // return response()->json($users);
+
+        $perPage = $request->query('per_page', 10);
+        $minAge = $request->query('min_age');
+        $birthYear = $request->query('birth_year');
+        $gender = $request->query('gender');
+        $village = $request->query('village');
+        $city = $request->query('city');
+        $state = $request->query('state');
+
+        if ($minAge || $birthYear || $gender || $village || $city || $state) {
+            $users = User::filterByAge($minAge)
+                ->filterByBirthYear($birthYear)
+                ->filterByGender($gender)
+                ->filterByLocation($village, $city, $state)
+                ->paginate($perPage);
+        }
+
+
+        // $users->each(function ($user) {
+        //     $user->birthYear = Carbon::parse($user->dob)->year; // Calculate birth year
+        // });
+
+        return response()->json($users);
     }
 
     /**
@@ -111,16 +131,20 @@ class UserController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function user_update(Request $request,$id)  // This is the function to update the user by Manager
+    public function user_update(Request $request, $id)  // This is the function to update the user by Manager
     {
         $user = auth()->user();
 
         $validator = Validator::make($request->all(), [
             'first_name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users',
+            'email' => [
+                'required',
+                'email',
+                Rule::unique('users')->ignore($id)
+            ],
             'password' => 'required|string|min:8',
             'c_password' => 'required|same:password', // Add password validation
-            'image' => 'required|mimes:jpeg,jpg,png,gif|max:500' //image validation
+            // 'image' => 'required|mimes:jpeg,jpg,png,gif|max:500' //image validation
         ]);
 
         if ($validator->fails()) {
@@ -134,17 +158,19 @@ class UserController extends Controller
         $user = User::find($id);
         $postParams = [
             'first_name' => $request->first_name,
-            'last_name' => 'required|string|max:255',
-            'password' => 'nullable|min:8',
-            'c_password' => 'same:password',
-            'image' => 'nullable|mimes:jpeg,jpg,png,gif|max:500',
+            'last_name' => $request->last_name,
+            'email' => $request->email,
+            'phone' => $request->phone,
+            // 'password' => 'nullable|min:8',
+            // 'c_password' => 'same:password',
+            // 'image' => 'nullable|mimes:jpeg,jpg,png,gif|max:500',
         ];
 
-        if (isset($request->image)) {
-            $imageName = time() . '.' . $request->image->extension();
-            $request->image->move(public_path('images/users'), $imageName);
-            $user->image = $imageName;
-        }
+        // if (isset($request->image)) {
+        //     $imageName = time() . '.' . $request->image->extension();
+        //     $request->image->move(public_path('images/users'), $imageName);
+        //     $user->image = $imageName;
+        // }
 
         if ($request->has('password')) {
             $user->password = bcrypt($request->password);
@@ -153,7 +179,6 @@ class UserController extends Controller
         $user->update($postParams);
 
         return response()->json($user, 200);
-
     }
 
     public function update(Request $request, $id)  //This is the function to update the user by user itself
@@ -222,20 +247,30 @@ class UserController extends Controller
             'about_job' => $request->about_job,
             // 'image' => $request->image,
             'education' => $request->education,
+            'village' => $request->village,
+            'city' => $request->city,
+            'state' => $request->state,
+
+
         ];
 
+        // Calculate the age from DOB and Store it 
         $age = \Carbon\Carbon::parse($dob)->diff(\Carbon\Carbon::now())->format('%y');
         $postParams['age'] = $age;
+
+        //Store the image
         if (isset($request->image)) {
             $imageName = time() . '.' . $request->image->extension();
             $request->image->move(public_path('images/users'), $imageName);
             $user->image = $imageName;
         }
 
+        // Update the passsword if and only if it is provided by the user
         if ($request->has('password')) {
             $user->password = bcrypt($request->password);
         }
 
+        // Update all other attributes rather than image and password
         $user->update($postParams);
 
         return response()->json($user, 200);
