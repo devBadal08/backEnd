@@ -69,6 +69,6 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
 
     //Routes for admin to get all user and manager simultaneously
 
-Route::get('allusers', [AdminController::class, 'index']);
+Route::get('allmembers', [AdminController::class, 'index']);
 
 });
