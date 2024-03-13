@@ -67,7 +67,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
         Route::post('{id}/manager/show', 'show');
     });
 
-    //Routes for admin to get all data
+    //Routes for admin to get all user and manager simultaneously
 
 Route::get('allusers', [AdminController::class, 'index']);
 
