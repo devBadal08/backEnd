@@ -37,7 +37,7 @@ class ManagerController extends Controller
             'last_name' => 'required|string|max:255',
             'email' => 'required|email|unique:users',
             'password' => 'required|string|min:8',
-            'c_password' => 'required|same:password', // Add password validation
+            'password_confirmation' => 'required|same:password', // Add password validation
             'phone' => 'required|numeric|digits:10',
             // 'image' => 'required|mimes:jpeg,jpg,png,gif|max:500' //image validation
         ]);
@@ -45,7 +45,7 @@ class ManagerController extends Controller
         if ($validator->fails()) {
             return response()->json($validator->errors(), 422);
         }
-        //store manager
+        //store manager details
         $manager->first_name = $request->first_name;
         $manager->last_name = $request->last_name;
         $manager->email = $request->email;
@@ -89,15 +89,17 @@ class ManagerController extends Controller
     public function manager_update(Request $request, $id)
     {
         $manager = auth()->user();
-
+    
         $validator = Validator::make($request->all(), [
             'first_name' => 'required|string|max:255',
+            'last_name' => 'required|string|max:255',
             'email' => [
                 'required',
                 'email',
-                Rule::unique('users')->ignore($id)],
-            'password' => 'required|string|min:8',
-            'c_password' => 'required|same:password', // Add password validation
+                Rule::unique('users')->ignore($id)
+            ],
+            'password' => 'nullable|confirmed|min:8', // Password is optional, but if provided, needs confirmation and minimum length
+            'password_confirmation' => 'nullable|required_with:password', // Confirmation required only if password is provided
             // 'image' => 'required|mimes:jpeg,jpg,png,gif|max:500' //image validation
         ]);
 
@@ -115,7 +117,7 @@ class ManagerController extends Controller
             'last_name' => $request->last_name,
             'email' => $request->email,
             'phone' => $request->phone,
-            // 'c_password' => 'same:password',
+            // 'password_confirmation' => 'same:password',
             // 'image' => 'nullable|mimes:jpeg,jpg,png,gif|max:500',
         ];
 
@@ -152,8 +154,8 @@ class ManagerController extends Controller
             'gender' => 'required',
             'phone' => 'required',
             'alt_phone' => 'nullable',
-            'password' => 'nullable',
-            'c_password' => 'same:password',
+            'password' => 'nullable|confirmed|min:8', // Password is optional, but if provided, needs confirmation and minimum length
+            'password_confirmation' => 'nullable|required_with:password', // Confirmation required only if password is provided
             'username' => 'required',
             'marital_status' => 'required',
             'village' => 'nullable',

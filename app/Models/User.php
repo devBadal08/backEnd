@@ -56,18 +56,6 @@ class User extends Authenticatable
         return $query;
     }
 
-    // public function getBirthYearAttribute()
-    // {
-    //     return Carbon::parse($this->dob)->year; // Replace 'date_of_birth' with your actual column name
-    // }
-
-    // public function scopeFilterByBirthYear($query, $birthYear)
-    // {
-    //     if ($birthYear) {
-    //         return $query->where('birth_year', $birthYear);
-    //     }
-    //     return $query;
-    // }
     public function scopeFilterByBirthYear($query, $birthYear)
     {
         if ($birthYear) {

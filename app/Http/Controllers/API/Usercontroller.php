@@ -145,8 +145,8 @@ class UserController extends Controller
                 'email',
                 Rule::unique('users')->ignore($id)
             ],
-            'password' => 'required|string|min:8',
-            'c_password' => 'required|same:password', // Add password validation
+            'password' => 'nullable|confirmed|min:8', // Password is optional, but if provided, needs confirmation and minimum length
+            'password_confirmation' => 'nullable|required_with:password', // Confirmation required only if password is provided
             // 'image' => 'required|mimes:jpeg,jpg,png,gif|max:500' //image validation
         ]);
 
@@ -205,8 +205,8 @@ class UserController extends Controller
             'gender' => 'required',
             'phone' => 'required|numeric|digits:10',
             'alt_phone' => 'nullable|numeric|digits:10',
-            'password' => 'nullable|min:8',
-            'c_password' => 'same:password',
+            'password' => 'nullable|confirmed|min:8', // Password is optional, but if provided, needs confirmation and minimum length
+            'password_confirmation' => 'nullable|required_with:password', // Confirmation required only if password is provided
             'username' => 'required',
             'marital_status' => 'required',
             'village' => 'nullable',
