@@ -80,7 +80,9 @@ class UserController extends Controller
             'email' => 'required|email|unique:users',
             'password' => 'required|string|min:8',
             'c_password' => 'required|same:password', // Add password validation
-            'image' => 'required|mimes:jpeg,jpg,png,gif|max:500' //image validation
+            'phone' => 'required|numeric|digits:10',
+
+            // 'image' => 'required|mimes:jpeg,jpg,png,gif|max:500' //image validation
         ]);
 
         if ($validator->fails()) {
@@ -91,11 +93,12 @@ class UserController extends Controller
         $user->last_name = $request->last_name;
         $user->email = $request->email;
         $user->password = bcrypt($request->password);
+        $user->phone = $request->phone;
         //UPLOAD IMAGE
-        $imageName = time() . '.' . $request->image->extension();
-        $request->image->move(public_path('images/users'), $imageName);
-        // print_r($img); exit;
-        $user->image = $imageName;   //store image name
+        // $imageName = time() . '.' . $request->image->extension();
+        // $request->image->move(public_path('images/users'), $imageName);
+        // // print_r($img); exit;
+        // $user->image = $imageName;   //store image name
         $user->role = 'user';
         $user->created_by = Auth::id();
         $user->save();
