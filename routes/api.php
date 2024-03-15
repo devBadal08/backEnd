@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\{
     AdminController,
     ManagerController,
     Usercontroller,
+    ProfileController,
 
 };
 
@@ -65,6 +66,15 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
         Route::post('{id}/manager/update', 'update');
         Route::post('{id}/manager/managerupdate', 'manager_update');
         Route::post('{id}/manager/show', 'show');
+    });
+
+    //Routes for profiles
+
+    Route::controller(ProfileController::class)->group(function () {
+        Route::get('profiles', 'index');
+        Route::post('profile/store', 'store');
+        Route::post('{id}/profile/update', 'profile_update');
+
     });
 
     //Routes for admin to get all user and manager simultaneously

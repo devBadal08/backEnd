@@ -46,11 +46,6 @@ class UserController extends Controller
                 ->paginate($perPage);
         }
 
-
-        // $users->each(function ($user) {
-        //     $user->birthYear = Carbon::parse($user->dob)->year; // Calculate birth year
-        // });
-
         return response()->json($users);
     }
 

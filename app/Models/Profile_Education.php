@@ -21,6 +21,6 @@ class Profile_Education extends Model
 
     public function profile()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(Profile::class);
     }
 }
