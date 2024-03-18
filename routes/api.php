@@ -71,7 +71,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     //Routes for profiles
 
     Route::controller(ProfileController::class)->group(function () {
-        Route::get('profiles', 'index');
+        Route::get('profiles/{id}', 'index');
         Route::post('profile/store', 'store');
         Route::post('{id}/profile/update', 'profile_update');
 

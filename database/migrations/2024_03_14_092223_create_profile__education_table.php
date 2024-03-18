@@ -11,10 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('profile__education', function (Blueprint $table) {
+        Schema::create('profile_education', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('profile_id'); // Foreign key to the profiles table
-            $table->foreign('profile_id')->references('id')->on('user'); // Foreign key to the profiles table
+            $table->BigInteger('profile_id'); // Foreign key to the profiles table
+            // $table->foreign('profile_id')->references('id')->on('user'); // Foreign key to the profiles table
             $table->string('type');
             $table->string('organization_name');
             $table->string('degree')->nullable();
@@ -29,6 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('profile__education');
+        Schema::dropIfExists('profile_education');
     }
 };

@@ -5,16 +5,17 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Profile_Education extends Model
+class ProfileEducation extends Model
 {
     use HasFactory;
+
+    protected $table = 'profile_education';
 
     protected $fillable = [
         'profile_id',
         'type',
-        'institution_name',
+        'organization_name',
         'degree',
-        'field_of_study',
         'start_year',
         'end_year',
     ];

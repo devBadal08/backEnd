@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Profile;
+use App\Models\ProfileEducation;
 use Spatie\Permission\Models\Permission;
 use Illuminate\Support\Facades\Validator;
 use Spatie\Permission\Traits\HasRoles;
@@ -15,39 +16,14 @@ use Illuminate\Validation\Rule;
 class ProfileController extends Controller
 {
     // To list the all profile under a particular manager
-    public function index($managerId)
+    public function index($id)
     {
-        $manager = User::findOrFail($managerId);
+        $manager = User::findOrFail($id);
         $profiles = $manager->profiles;
 
         return response()->json(['profiles' => $profiles]);
     }
-    // public function index(Request $request ) // Inject the request class (Optional)
-    // {
-    //     $id = $request->input('id'); // Get the manager ID from the request (Optional)
-
-    //     if ($id) {
-    //         $profiles = Profile::where('created_by', $id)->get();
-    //     } else {
-    //         // Handle the case where manager ID is not provided
-    //         // return response()->json(['error' => 'Missing required parameter: manager_id'], 400);
-    //     }
-
-    //     return response()->json($profiles);
-    // }
-
-    // public function index(Request $request)
-    // {
-    //     $user = Auth::user(); // Get currently logged-in user
-
-    //     if ($user->hasRole('manager')) { // Check if user is a manager
-    //         $profiles = Profile::where('user_id', $user->id)->with('education')->get(); // Eager load education
-    //         return view('profiles.index', compact('profiles'));
-    //     }
-
-    //     return abort(403, 'Unauthorized'); // Redirect or display error for non-managers
-    // }
-
+   
 
     // To store the profile under a particular manager
     public function store(Request $request)
@@ -95,7 +71,7 @@ class ProfileController extends Controller
         // dd($request);
 
         // $profile->user_id = $user->id; // Associate profile with manager
-        $profile->created_by = Auth::id();
+        $profile->user_id = Auth::id();
         $profile->first_name = $request->first_name;
         $profile->middle_name = $request->middle_name;
         $profile->last_name = $request->last_name;
@@ -119,11 +95,24 @@ class ProfileController extends Controller
         // Set other profile fields from request
         $profile->save();
 
-        // Handle education creation (optional)
-        // $educations = $request->input('education', []);
-        // foreach ($educations as $education) {
-        //     $profile->Profile_Education()->create($education);
-        // }
+        // Handle education creation 
+        if (isset($request->education) && !empty($request->education)){
+            $educations = $request->input('education', []);
+            foreach ($educations as $education) {
+                $educationArr = json_decode($education);
+                // print_r($educationArr->degree);
+                // die();
+                $postData = [
+                    'profile_id' => $profile->id,
+                    'type' => $educationArr->type,
+                    'organization_name' => $educationArr->organization_name,
+                    'degree' => $educationArr->degree,
+                    'start_year' => $educationArr->start_year,
+                    'end_year' => $educationArr->end_year
+                ];
+                $profileEducation = ProfileEducation::create($postData);
+            }
+        }
 
         return response()->json($profile);
         // dd($profile);

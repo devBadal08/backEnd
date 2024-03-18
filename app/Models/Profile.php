@@ -13,6 +13,8 @@ class Profile extends Model
 {
     use HasApiTokens, HasFactory, Notifiable, HasRoles;
 
+    protected $table = 'profiles';
+
     protected $fillable = [
         'user_id',
         'first_name',
@@ -49,6 +51,6 @@ class Profile extends Model
 
     public function education()
     {
-        return $this->hasMany(Profile_Education::class);
+        return $this->hasMany(ProfileEducation::class);
     }
 }
