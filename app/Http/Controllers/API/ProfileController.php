@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Profile;
@@ -14,6 +15,27 @@ use Illuminate\Validation\Rule;
 class ProfileController extends Controller
 {
     // To list the all profile under a particular manager
+    public function index($managerId)
+    {
+        $manager = User::findOrFail($managerId);
+        $profiles = $manager->profiles;
+
+        return response()->json(['profiles' => $profiles]);
+    }
+    // public function index(Request $request ) // Inject the request class (Optional)
+    // {
+    //     $id = $request->input('id'); // Get the manager ID from the request (Optional)
+
+    //     if ($id) {
+    //         $profiles = Profile::where('created_by', $id)->get();
+    //     } else {
+    //         // Handle the case where manager ID is not provided
+    //         // return response()->json(['error' => 'Missing required parameter: manager_id'], 400);
+    //     }
+
+    //     return response()->json($profiles);
+    // }
+
     // public function index(Request $request)
     // {
     //     $user = Auth::user(); // Get currently logged-in user
@@ -55,7 +77,7 @@ class ProfileController extends Controller
             'about_self' => 'required',
             'about_job' => 'required',
             'image' => 'required|mimes:jpeg,jpg,png,gif|max:500', //image validation
-            'education' => 'required',
+            // 'education' => 'required',
         ]);
 
         if ($validator->fails()) {
@@ -98,10 +120,10 @@ class ProfileController extends Controller
         $profile->save();
 
         // Handle education creation (optional)
-        $educations = $request->input('education', []);
-        foreach ($educations as $education) {
-            $profile->education()->create($education);
-        }
+        // $educations = $request->input('education', []);
+        // foreach ($educations as $education) {
+        //     $profile->Profile_Education()->create($education);
+        // }
 
         return response()->json($profile);
         // dd($profile);
