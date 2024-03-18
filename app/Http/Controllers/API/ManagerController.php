@@ -13,9 +13,26 @@ use Spatie\Permission\Models\Permission;
 
 class ManagerController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $managers = User::where('role', 'manager')->paginate(10);
+
+        $perPage = $request->query('per_page', 10);
+        $minAge = $request->query('min_age');
+        $birthYear = $request->query('birth_year');
+        $gender = $request->query('gender');
+        $village = $request->query('village');
+        $city = $request->query('city');
+        $state = $request->query('state');
+
+        if ($minAge || $birthYear || $gender || $village || $city || $state) {
+            $managers = User::filterByAge($minAge)
+                ->filterByBirthYear($birthYear)
+                ->filterByGender($gender)
+                ->filterByLocation($village, $city, $state)
+                ->paginate($perPage);
+        }
+
         return response()->json($managers);
     }
 

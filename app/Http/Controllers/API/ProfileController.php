@@ -16,10 +16,29 @@ use Illuminate\Validation\Rule;
 class ProfileController extends Controller
 {
     // To list the all profile under a particular manager
-    public function index($id)
+    public function index(Request $request, $id)
     {
-        $manager = User::findOrFail($id);
-        $profiles = $manager->profiles;
+        // $manager = User::findOrFail($id);
+        // $profiles = (($manager->profiles)->paginate(1));
+
+        $profiles = Profile::where('user_id', auth()->user()->id)->paginate(10);
+
+
+        $perPage = $request->query('per_page', 10);
+        $minAge = $request->query('min_age');
+        $birthYear = $request->query('birth_year');
+        $gender = $request->query('gender');
+        $village = $request->query('village');
+        $city = $request->query('city');
+        $state = $request->query('state');
+
+        if ($minAge || $birthYear || $gender || $village || $city || $state) {
+            $profiles = User::filterByAge($minAge)
+                ->filterByBirthYear($birthYear)
+                ->filterByGender($gender)
+                ->filterByLocation($village, $city, $state)
+                ->paginate($perPage);
+        }
 
         return response()->json(['profiles' => $profiles]);
     }
