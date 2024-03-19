@@ -44,6 +44,47 @@ class Profile extends Model
         // Other profile fields
     ];
 
+    public function scopeFilterByAge($query, $minAge)
+    {
+        if ($minAge) {
+            return $query->where('age', '>=', $minAge);
+        }
+        return $query;
+    }
+
+    public function scopeFilterByBirthYear($query, $birthYear)
+    {
+        if ($birthYear) {
+            return $query->whereYear('dob', $birthYear);
+        }
+        return $query;
+    }
+
+    public function scopeFilterByGender($query, $gender)
+    {
+        if ($gender) {
+            return $query->where('gender', $gender);
+        }
+        return $query;
+    }
+
+    public function scopeFilterByLocation($query, $village, $city, $state)
+    {
+        $filters = [];
+        if ($village) {
+            $filters[] = ['village', 'like', "%$village%"];
+        }
+        if ($city) {
+            $filters[] = ['city', 'like', "%$city%"];
+        }
+        if ($state) {
+            $filters[] = ['state', $state];
+        }
+
+        return $query->where($filters);
+    }
+
+
     public function user()
     {
         return $this->belongsTo(User::class);

@@ -42,7 +42,7 @@ class ProfileController extends Controller
 
         return response()->json(['profiles' => $profiles]);
     }
-   
+
 
     // To store the profile under a particular manager
     public function store(Request $request)
@@ -85,7 +85,7 @@ class ProfileController extends Controller
         if (isset($request->image)) {
             $imageName = time() . '.' . $request->image->extension();
             $request->image->move(public_path('images/profiles'), $imageName);
-            $user->image = $imageName;
+            $profile->image = $imageName;
         }
         // dd($request);
 
@@ -115,7 +115,7 @@ class ProfileController extends Controller
         $profile->save();
 
         // Handle education creation 
-        if (isset($request->education) && !empty($request->education)){
+        if (isset($request->education) && !empty($request->education)) {
             $educations = $request->input('education', []);
             foreach ($educations as $education) {
                 $educationArr = json_decode($education);
@@ -222,5 +222,23 @@ class ProfileController extends Controller
         $profile->update($postParams);
 
         return response()->json($profile, 200);
+    }
+
+    //To Delete a profile
+    public function destroy($id)
+    {
+        // echo "here"; exit;
+        $profile = Profile::find($id);
+
+        // Check if profile belongs to the currently authenticated user 
+        if (auth()->user()->id !== $profile->user_id) {
+            return response()->json(['error' => 'Unauthorized deletion'], 403);
+        }
+        // Delete education data associated with the profile (assuming foreign key)
+        $profile->education()->delete();
+
+        // Delete the profile itself
+        $profile->delete();
+        return response()->json(['message' => 'Profile deleted successfully']);
     }
 }

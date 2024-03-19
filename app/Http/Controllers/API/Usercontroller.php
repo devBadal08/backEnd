@@ -64,7 +64,7 @@ class UserController extends Controller
     {
         // dd($request->user()->id);
         // Permission for user
-        $user_list = Permission::where(['name' => 'user.list'])->first();
+        $profile_list = Permission::where(['name' => 'profile.list'])->first();
 
         $user = new User();
 
@@ -100,7 +100,7 @@ class UserController extends Controller
 
         $user->assignRole('user');
         $user->givePermissionTo([
-            $user_list,
+            $profile_list,
         ]);
 
         return response()->json($user);

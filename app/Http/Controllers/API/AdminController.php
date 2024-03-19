@@ -9,9 +9,17 @@ use App\Http\Controllers\API\DB;
 
 class AdminController extends Controller
 {
+
+  // List all the managers and all profiles under particular manager
   public function index()
   {
-    $users = User::get();
-    return response()->json($users);
+    // $users = User::get();
+    // return response()->json($users);
+
+    $managers = User::where('role', 'manager')
+        ->with('profiles') // Eager load profiles for each manager
+        ->get();
+
+    return response()->json($managers);
   }
 }

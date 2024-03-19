@@ -30,6 +30,10 @@ class UserSeeder extends Seeder
         $user_update = Permission::create(['name'=>'user.update']);
         $user_delete = Permission::create(['name'=>'user.delete']);
 
+        //profile permition for user
+        $profile_list = Permission::create(['name'=>'profile.list']);
+        
+
         //admin
         $admin = User::create([
             'first_name' => 'Admin',
@@ -98,12 +102,12 @@ class UserSeeder extends Seeder
 
         $user->assignRole('user');
         $user->givePermissionTo([
-            $user_list,
+            $profile_list,
 
         ]);
 
         $user_role->givePermissionTo([
-            $user_list,
+            $profile_list,
 
         ]); 
         

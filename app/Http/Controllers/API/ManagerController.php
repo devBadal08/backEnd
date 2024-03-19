@@ -117,6 +117,8 @@ class ManagerController extends Controller
             ],
             'password' => 'nullable|confirmed|min:8', // Password is optional, but if provided, needs confirmation and minimum length
             'password_confirmation' => 'nullable|required_with:password', // Confirmation required only if password is provided
+            'phone' => 'required|numeric|digits:10',
+           
             // 'image' => 'required|mimes:jpeg,jpg,png,gif|max:500' //image validation
         ]);
 
