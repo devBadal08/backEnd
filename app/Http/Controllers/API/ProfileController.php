@@ -7,7 +7,6 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Profile;
-use App\Models\ProfileEducation;
 use Spatie\Permission\Models\Permission;
 use Illuminate\Support\Facades\Validator;
 use Spatie\Permission\Traits\HasRoles;
@@ -22,7 +21,6 @@ class ProfileController extends Controller
         // $profiles = (($manager->profiles)->paginate(1));
 
         $profiles = Profile::where('user_id', auth()->user()->id)->paginate(10);
-
 
         $perPage = $request->query('per_page', 10);
         $minAge = $request->query('min_age');
@@ -44,7 +42,7 @@ class ProfileController extends Controller
     }
 
 
-    // To store the profile under a particular manager
+    // To store the profile's personal information under a particular manager
     public function store(Request $request)
     {
         $profile = new Profile;
@@ -89,8 +87,8 @@ class ProfileController extends Controller
         }
         // dd($request);
 
-        // $profile->user_id = $user->id; // Associate profile with manager
-        $profile->user_id = Auth::id();
+        // $profile->user_id = $user->id; 
+        $profile->user_id = Auth::id(); // Associate profile with manager
         $profile->first_name = $request->first_name;
         $profile->middle_name = $request->middle_name;
         $profile->last_name = $request->last_name;
@@ -113,33 +111,12 @@ class ProfileController extends Controller
 
         // Set other profile fields from request
         $profile->save();
-
-        // Handle education creation 
-        if (isset($request->education) && !empty($request->education)) {
-            $educations = $request->input('education', []);
-            foreach ($educations as $education) {
-                $educationArr = json_decode($education);
-                // print_r($educationArr->degree);
-                // die();
-                $postData = [
-                    'profile_id' => $profile->id,
-                    'type' => $educationArr->type,
-                    'organization_name' => $educationArr->organization_name,
-                    'degree' => $educationArr->degree,
-                    'start_year' => $educationArr->start_year,
-                    'end_year' => $educationArr->end_year
-                ];
-                $profileEducation = ProfileEducation::create($postData);
-            }
-        }
-
         return response()->json($profile);
         // dd($profile);
 
     }
 
     // To update the profile by a manager
-
     public function profile_update(Request $request, $id)
     {
         $profile = auth()->user();

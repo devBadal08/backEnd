@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\{
     ManagerController,
     Usercontroller,
     ProfileController,
+    EducationController,
 
 };
 
@@ -68,13 +69,21 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
         Route::post('{id}/manager/show', 'show');
     });
 
-    //Routes for profiles
+    //Routes for profile 
 
     Route::controller(ProfileController::class)->group(function () {
         Route::get('{id}/profiles', 'index');
-        Route::post('profile/store', 'store');
+        Route::post('profile/personal/store', 'store');
         Route::post('{id}/profile/update', 'profile_update');
         Route::delete('{id}/profile/delete', 'destroy');
+
+
+    });
+
+    // Routes for profile education
+    Route::controller(EducationController::class)->group(function () {
+        Route::post('profile/education/store', 'storeEducation');
+        Route::post('{id}/education/update', 'educationUpdate');
 
 
     });
