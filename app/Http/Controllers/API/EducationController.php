@@ -41,10 +41,12 @@ class EducationController extends Controller
                     'start_year' => $educationArr->start_year,
                     'end_year' => $educationArr->end_year
                 ];
+
                 $profileEducation = ProfileEducation::create($postData);
             }
         }
-        return response()->json($postData);
+        $profileEducation = ProfileEducation::where('profile_id',$request->profile_id)->get();
+        return response()->json(['data'=> $profileEducation]);
 
     }
 }
