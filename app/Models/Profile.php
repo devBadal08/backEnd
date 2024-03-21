@@ -38,11 +38,25 @@ class Profile extends Model
         'about_job',
         'education',
         'age',
-        'village', 
-        'city', 
+        'village',
+        'city',
         'state',
         // Other profile fields
     ];
+
+    public function scopeFilterBySearch($query, $searchTerm)
+    {
+        if ($searchTerm) {
+            return $query->where(function($query) use ($searchTerm) {
+                $query->where('first_name', 'like', "%$searchTerm%")
+                      ->orWhere('middle_name', 'like', "%$searchTerm%")
+                      ->orWhere('last_name', 'like', "%$searchTerm%")
+                      ->orWhere('email', 'like', "%$searchTerm%")
+                      ->orWhere('phone', 'like', "%$searchTerm%");
+            });
+        }
+        return $query;
+    }
 
     public function scopeFilterByAge($query, $minAge)
     {
@@ -90,8 +104,8 @@ class Profile extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function education()
+    public function educations()
     {
-        return $this->hasMany(ProfileEducation::class);
+        return $this->hasMany(ProfileEducation::class, 'profile_id');
     }
 }

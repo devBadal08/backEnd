@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Resources\UserResource;
 use Spatie\Permission\Models\Permission;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
@@ -25,9 +26,7 @@ class UserController extends Controller
 
     public function index(Request $request)
     {
-
-
-        $users = User::where('created_by', auth()->user()->id)->paginate(10);
+        $userQuery = User::where('created_by', auth()->user()->id)->paginate(10);
         // return response()->json($users);
 
         $perPage = $request->query('per_page', 10);
@@ -37,16 +36,43 @@ class UserController extends Controller
         $village = $request->query('village');
         $city = $request->query('city');
         $state = $request->query('state');
+        $searchTerm = $request->query('keyword');
 
-        if ($minAge || $birthYear || $gender || $village || $city || $state) {
-            $users = User::filterByAge($minAge)
-                ->filterByBirthYear($birthYear)
-                ->filterByGender($gender)
-                ->filterByLocation($village, $city, $state)
-                ->paginate($perPage);
+
+        if (isset($searchTerm) && !empty($searchTerm)) {
+            $userQuery->filterBySearch($searchTerm);
+          }
+          if (isset($minAge) && !empty($minAge)) {
+            $userQuery->filterByAge($minAge);
+          }
+          if (isset($birthYear) && !empty($birthYear)) {
+            $userQuery->filterByBirthYear($birthYear);
+          }
+          if (isset($gender) && !empty($gender)) {
+            $userQuery->filterByGender($gender);
+          }
+          if (isset($village) && !empty($village)) {
+            $userQuery->filterByLocation($village, $city, $state);
+        }
+        if (isset($city) && !empty($city)) {
+            $userQuery->filterByLocation($village, $city, $state);
+        }
+        if (isset($state) && !empty($state)) {
+            $userQuery->filterByLocation($village, $city, $state);
         }
 
-        return response()->json($users);
+        // if ($minAge || $birthYear || $gender || $village || $city || $state) {
+        //     $users = User::filterByAge($minAge)
+        //         ->filterByBirthYear($birthYear)
+        //         ->filterByGender($gender)
+        //         ->filterByLocation($village, $city, $state)
+        //         ->paginate($perPage);
+        // }
+
+        // return response()->json($userQuery);
+        return UserResource::collection($userQuery);
+        // return UserResource::collection($userQuery->paginate($perPage));
+
     }
 
     /**
@@ -74,7 +100,7 @@ class UserController extends Controller
             'last_name' => 'required|string|max:255',
             'email' => 'required|email|unique:users',
             'password' => 'required|string|min:8',
-            'c_password' => 'required|same:password', // Add password validation
+            'password_confirmation' => 'required|same:password', // Add password validation
             'phone' => 'required|numeric|digits:10',
 
             // 'image' => 'required|mimes:jpeg,jpg,png,gif|max:500' //image validation
@@ -217,7 +243,6 @@ class UserController extends Controller
             // Add other fields as needed
         ]);
 
-        $dob = $request->dob;
         // print_r($request); exit;
         if ($validator->fails()) {
             $response = [
@@ -253,6 +278,7 @@ class UserController extends Controller
         ];
 
         // Calculate the age from DOB and Store it 
+        $dob = $request->dob;
         $age = \Carbon\Carbon::parse($dob)->diff(\Carbon\Carbon::now())->format('%y');
         $postParams['age'] = $age;
 

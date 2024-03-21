@@ -2,28 +2,33 @@
 
 namespace App\Http\Resources;
 
+use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class UserResource extends JsonResource
+class ProfileResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @return array|\Illuminate\Contracts\Support\Arrayable|\JsonSerializable
+     * @return array<string, mixed>
      */
     public function toArray($request)
     {
-        // Get all fields of the user model
-        // $userFields = $this->resource->toArray();
+        // return parent::toArray($request);
+        // $additionalFields = [
+        // //     'first_name'=> $request->first_name,
+        // //     'first_name'=> $request->first_name,
+        // //     'first_name'=> $request->first_name,
+        // //     'first_name'=> $request->first_name,
+        // //     'image'=> fullURL(public\images\profiles).'/'.$request->image,
+        // 'image' => $this->image ? asset('storage/' . $this->image) : null,
+        // ];
+
+        // Get all fields of the profile model
+        // $ProfileFields = $this->resource->toArray();
     
         // Merge additional fields
-        $fields = [
-            'token' => $this->createToken("Token")->plainTextToken,
-            'roles' => $this->roles->pluck('name') ?? [],
-            'roles_permissions' => $this->getPermissionsViaRoles()->pluck('name') ?? [],
-            'permissions' => $this->permissions->pluck('name') ?? [],
-
+        $ProfileFields = [
             'image_url' => $this->image ? asset('images/profiles/' . $this->image) : null,
             'id' => $this->id,
             'user_id' => $this->user_id,
@@ -45,12 +50,11 @@ class UserResource extends JsonResource
             'hobbies' => $this->hobbies,
             'about_self' => $this->about_self,
             'about_job' => $this->about_job,
+            'educations' => $this->educations,
         ];
-
-        return $fields;
-
     
         // Merge all fields together
-        // return array_merge($userFields, $additionalFields);
+        // return array_merge($ProfileFields, $additionalFields);
+        return $ProfileFields;
     }
 }

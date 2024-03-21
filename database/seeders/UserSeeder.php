@@ -15,24 +15,30 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
-        
+
         //manager permition for admin
-        $manager_list = Permission::create(['name'=>'manager.list']);
-        $manager_view = Permission::create(['name'=>'manager.view']);
-        $manager_create = Permission::create(['name'=>'manager.create']);
-        $manager_update = Permission::create(['name'=>'manager.update']);
-        $manager_delete = Permission::create(['name'=>'manager.delete']);
+        $manager_list = Permission::create(['name' => 'manager.list']);
+        $manager_view = Permission::create(['name' => 'manager.view']);
+        $manager_create = Permission::create(['name' => 'manager.create']);
+        $manager_update = Permission::create(['name' => 'manager.update']);
+        $manager_delete = Permission::create(['name' => 'manager.delete']);
 
         //user Permitions for manager
-        $user_list = Permission::create(['name'=>'user.list']);
-        $user_view = Permission::create(['name'=>'user.view']);
-        $user_create = Permission::create(['name'=>'user.create']);
-        $user_update = Permission::create(['name'=>'user.update']);
-        $user_delete = Permission::create(['name'=>'user.delete']);
+        $user_list = Permission::create(['name' => 'user.list']);
+        $user_view = Permission::create(['name' => 'user.view']);
+        $user_create = Permission::create(['name' => 'user.create']);
+        $user_update = Permission::create(['name' => 'user.update']);
+        $user_delete = Permission::create(['name' => 'user.delete']);
+
+        $profile_list = Permission::create(['name' => 'profile.list']);
+        $profile_view = Permission::create(['name' => 'profile.view']);
+        $profile_create = Permission::create(['name' => 'profile.create']);
+        $profile_update = Permission::create(['name' => 'profile.update']);
+        $profile_delete = Permission::create(['name' => 'profile.delete']);
 
         //profile permition for user
-        $profile_list = Permission::create(['name'=>'profile.list']);
-        
+        $profile_list = Permission::create(['name' => 'profile.list']);
+
 
         //admin
         $admin = User::create([
@@ -42,13 +48,18 @@ class UserSeeder extends Seeder
             'password' => bcrypt('password')
         ]);
 
-        $admin_role = Role::create(['name'=> 'admin']);
+        $admin_role = Role::create(['name' => 'admin']);
         $admin_role->givePermissionTo([
             $manager_create,
             $manager_list,
             $manager_update,
             $manager_view,
-            $manager_delete
+            $manager_delete,
+            $profile_list,
+            // $profile_view,
+            // $profile_create,
+            // $profile_update,
+            // $profile_delete,
 
         ]);
 
@@ -58,7 +69,8 @@ class UserSeeder extends Seeder
             $manager_list,
             $manager_update,
             $manager_view,
-            $manager_delete
+            $manager_delete,
+            $profile_list,
 
         ]);
 
@@ -70,13 +82,18 @@ class UserSeeder extends Seeder
             'password' => bcrypt('password')
         ]);
 
-        $manager_role = Role::create(['name'=> 'manager']);
+        $manager_role = Role::create(['name' => 'manager']);
         $manager_role->givePermissionTo([
             $user_create,
             $user_list,
             $user_update,
             $user_view,
-            $user_delete
+            $user_delete,
+            $profile_list,
+            $profile_view,
+            $profile_create,
+            $profile_update,
+            $profile_delete,
 
         ]);
 
@@ -86,7 +103,12 @@ class UserSeeder extends Seeder
             $user_list,
             $user_update,
             $user_view,
-            $user_delete
+            $user_delete,
+            $profile_list,
+            $profile_view,
+            $profile_create,
+            $profile_update,
+            $profile_delete,
 
         ]);
 
@@ -109,7 +131,6 @@ class UserSeeder extends Seeder
         $user_role->givePermissionTo([
             $profile_list,
 
-        ]); 
-        
+        ]);
     }
 }

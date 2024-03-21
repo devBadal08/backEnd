@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\ProfileResource;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -19,9 +20,6 @@ class ProfileController extends Controller
     {
         // $manager = User::findOrFail($id);
         // $profiles = (($manager->profiles)->paginate(1));
-
-        $profiles = Profile::where('user_id', auth()->user()->id)->paginate(10);
-
         $perPage = $request->query('per_page', 10);
         $minAge = $request->query('min_age');
         $birthYear = $request->query('birth_year');
@@ -29,20 +27,48 @@ class ProfileController extends Controller
         $village = $request->query('village');
         $city = $request->query('city');
         $state = $request->query('state');
+        $searchTerm = $request->query('keyword');
 
-        if ($minAge || $birthYear || $gender || $village || $city || $state) {
-            $profiles = User::filterByAge($minAge)
-                ->filterByBirthYear($birthYear)
-                ->filterByGender($gender)
-                ->filterByLocation($village, $city, $state)
-                ->paginate($perPage);
+        $profilesQuery = Profile::where('user_id', auth()->user()->id)
+            ->with('educations');
+
+        if (isset($searchTerm) && !empty($searchTerm)) {
+            $profilesQuery->filterBySearch($searchTerm);
+            
+        }
+        if (isset($minAge) && !empty($minAge)) {
+            $profilesQuery->filterByAge($minAge);
+        }
+        if (isset($birthYear) && !empty($birthYear)) {
+            $profilesQuery->filterByBirthYear($birthYear);
+        }
+        if (isset($gender) && !empty($gender)) {
+            $profilesQuery->filterByGender($gender);
+        }
+        if (isset($village) && !empty($village)) {
+            $profilesQuery->filterByLocation($village, $city, $state);
+        }
+        if (isset($city) && !empty($city)) {
+            $profilesQuery->filterByLocation($village, $city, $state);
+        }
+        if (isset($state) && !empty($state)) {
+            $profilesQuery->filterByLocation($village, $city, $state);
         }
 
-        return response()->json(['profiles' => $profiles]);
+
+        // if ($minAge || $birthYear || $gender || $village || $city || $state) {
+        //     $profilesQuery->filterByAge($minAge)
+        //         ->filterByBirthYear($birthYear)
+        //         ->filterByGender($gender)
+        //         ->filterByLocation($village, $city, $state);
+        // }
+
+        // print_r($profilesQuery->paginate($perPage)->toArray());exit;
+        return ProfileResource::collection($profilesQuery->paginate($perPage));
     }
 
 
-    // To store the profile's personal information under a particular manager
+    // To create the profile with personal information under a particular manager
     public function store(Request $request)
     {
         $profile = new Profile;
@@ -61,7 +87,7 @@ class ProfileController extends Controller
             'alt_phone' => 'nullable|numeric|digits:10',
             'username' => 'required',
             'marital_status' => 'required',
-            'village' => 'required',
+            'village' => 'nullable',
             'city' => 'required',
             'state' => 'required',
             'height' => 'required',
@@ -78,6 +104,11 @@ class ProfileController extends Controller
         }
 
         $user = Auth::user(); // Get currently logged-in user
+
+        // Calculate the age from DOB and Store it 
+        $dob = $request->dob;
+        $age = \Carbon\Carbon::parse($dob)->diff(\Carbon\Carbon::now())->format('%y');
+        $postParams['age'] = $age;
 
         //Store the image
         if (isset($request->image)) {
@@ -117,7 +148,7 @@ class ProfileController extends Controller
     }
 
     // To update the profile by a manager
-    public function profile_update(Request $request, $id)
+    public function profileUpdate(Request $request, $id)
     {
         $profile = auth()->user();
 
