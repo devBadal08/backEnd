@@ -16,7 +16,7 @@ class UserResource extends JsonResource
     {
         // Get all fields of the user model
         // $userFields = $this->resource->toArray();
-    
+
         // Merge additional fields
         $fields = [
             'token' => $this->createToken("Token")->plainTextToken,
@@ -24,7 +24,7 @@ class UserResource extends JsonResource
             'roles_permissions' => $this->getPermissionsViaRoles()->pluck('name') ?? [],
             'permissions' => $this->permissions->pluck('name') ?? [],
 
-            'image_url' => $this->image ? asset('images/profiles/' . $this->image) : null,
+            'image_url' => $this->image ? asset('images/users/' . $this->image) : null,
             'id' => $this->id,
             'user_id' => $this->user_id,
             'first_name' => $this->first_name,
@@ -47,9 +47,14 @@ class UserResource extends JsonResource
             'about_job' => $this->about_job,
         ];
 
+        // Include profiles
+        if ($this->profiles) {
+            $fields['profiles'] = $this->profiles->toArray();
+        }
+
         return $fields;
 
-    
+
         // Merge all fields together
         // return array_merge($userFields, $additionalFields);
     }

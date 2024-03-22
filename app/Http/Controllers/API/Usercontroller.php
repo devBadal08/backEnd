@@ -26,7 +26,7 @@ class UserController extends Controller
 
     public function index(Request $request)
     {
-        $userQuery = User::where('created_by', auth()->user()->id)->paginate(10);
+        // $userQuery = User::where('created_by', auth()->user()->id)->paginate(10);
         // return response()->json($users);
 
         $perPage = $request->query('per_page', 10);
@@ -38,28 +38,31 @@ class UserController extends Controller
         $state = $request->query('state');
         $searchTerm = $request->query('keyword');
 
+        $usersQuery = User::where('created_by', auth()->user()->id);
 
         if (isset($searchTerm) && !empty($searchTerm)) {
-            $userQuery->filterBySearch($searchTerm);
-          }
-          if (isset($minAge) && !empty($minAge)) {
-            $userQuery->filterByAge($minAge);
-          }
-          if (isset($birthYear) && !empty($birthYear)) {
-            $userQuery->filterByBirthYear($birthYear);
-          }
-          if (isset($gender) && !empty($gender)) {
-            $userQuery->filterByGender($gender);
-          }
-          if (isset($village) && !empty($village)) {
-            $userQuery->filterByLocation($village, $city, $state);
+            $usersQuery->filterBySearch($searchTerm);
+            
+        }
+        if (isset($minAge) && !empty($minAge)) {
+            $usersQuery->filterByAge($minAge);
+        }
+        if (isset($birthYear) && !empty($birthYear)) {
+            $usersQuery->filterByBirthYear($birthYear);
+        }
+        if (isset($gender) && !empty($gender)) {
+            $usersQuery->filterByGender($gender);
+        }
+        if (isset($village) && !empty($village)) {
+            $usersQuery->filterByLocation($village, $city, $state);
         }
         if (isset($city) && !empty($city)) {
-            $userQuery->filterByLocation($village, $city, $state);
+            $usersQuery->filterByLocation($village, $city, $state);
         }
         if (isset($state) && !empty($state)) {
-            $userQuery->filterByLocation($village, $city, $state);
+            $usersQuery->filterByLocation($village, $city, $state);
         }
+
 
         // if ($minAge || $birthYear || $gender || $village || $city || $state) {
         //     $users = User::filterByAge($minAge)
@@ -70,8 +73,9 @@ class UserController extends Controller
         // }
 
         // return response()->json($userQuery);
-        return UserResource::collection($userQuery);
-        // return UserResource::collection($userQuery->paginate($perPage));
+        // return UserResource::collection($userQuery);
+        return UserResource::collection($usersQuery->paginate($perPage));
+
 
     }
 

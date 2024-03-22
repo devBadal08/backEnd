@@ -71,7 +71,6 @@ class UserSeeder extends Seeder
             $manager_view,
             $manager_delete,
             $profile_list,
-
         ]);
 
         //Manager

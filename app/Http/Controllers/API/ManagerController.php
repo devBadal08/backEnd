@@ -7,15 +7,19 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use App\Models\User;
+use App\Http\Resources\UserResource;
 use Spatie\Permission\Models\Permission;
 
 
 
 class ManagerController extends Controller
 {
+    //List the all managers
     public function index(Request $request)
     {
-        $managers = User::where('role', 'manager')->paginate(10);
+        // $managers = User::where('role', 'manager')
+        //     ->with('profiles')
+        //     ->get();
 
         $perPage = $request->query('per_page', 10);
         $minAge = $request->query('min_age');
@@ -24,16 +28,46 @@ class ManagerController extends Controller
         $village = $request->query('village');
         $city = $request->query('city');
         $state = $request->query('state');
+        $searchTerm = $request->query('keyword');
 
-        if ($minAge || $birthYear || $gender || $village || $city || $state) {
-            $managers = User::filterByAge($minAge)
-                ->filterByBirthYear($birthYear)
-                ->filterByGender($gender)
-                ->filterByLocation($village, $city, $state)
-                ->paginate($perPage);
+        $managersQuery = User::where('role', 'manager')
+            ->with('profiles');
+
+        if (isset($searchTerm) && !empty($searchTerm)) {
+            $managersQuery->filterBySearch($searchTerm);
+        }
+        if (isset($minAge) && !empty($minAge)) {
+            $managersQuery->filterByAge($minAge);
+        }
+        if (isset($birthYear) && !empty($birthYear)) {
+            $managersQuery->filterByBirthYear($birthYear);
+        }
+        if (isset($gender) && !empty($gender)) {
+            $managersQuery->filterByGender($gender);
+        }
+        if (isset($village) && !empty($village)) {
+            $managersQuery->filterByLocation($village, $city, $state);
+        }
+        if (isset($city) && !empty($city)) {
+            $managersQuery->filterByLocation($village, $city, $state);
+        }
+        if (isset($state) && !empty($state)) {
+            $managersQuery->filterByLocation($village, $city, $state);
         }
 
-        return response()->json($managers);
+        // if ($minAge || $birthYear || $gender || $village || $city || $state) {
+        //     $managers = User::filterByAge($minAge)
+        //         ->filterByBirthYear($birthYear)
+        //         ->filterByGender($gender)
+        //         ->filterByLocation($village, $city, $state)
+        //         ->paginate($perPage);
+        // }
+
+        return UserResource::collection($managersQuery->paginate($perPage));
+
+        // return response()->json($managerQuery->paginate($perPage));
+
+
     }
 
     public function store(Request $request)
@@ -106,7 +140,7 @@ class ManagerController extends Controller
     public function manager_update(Request $request, $id)
     {
         $manager = auth()->user();
-    
+
         $validator = Validator::make($request->all(), [
             'first_name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
@@ -118,7 +152,7 @@ class ManagerController extends Controller
             'password' => 'nullable|confirmed|min:8', // Password is optional, but if provided, needs confirmation and minimum length
             'password_confirmation' => 'nullable|required_with:password', // Confirmation required only if password is provided
             'phone' => 'required|numeric|digits:10',
-           
+
             // 'image' => 'required|mimes:jpeg,jpg,png,gif|max:500' //image validation
         ]);
 

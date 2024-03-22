@@ -43,8 +43,8 @@ class User extends Authenticatable
         'about_job',
         'education',
         'age',
-        'village', 
-        'city', 
+        'village',
+        'city',
         'state',
 
 
@@ -53,12 +53,12 @@ class User extends Authenticatable
     public function scopeFilterBySearch($query, $searchTerm)
     {
         if ($searchTerm) {
-            return $query->where(function($query) use ($searchTerm) {
+            return $query->where(function ($query) use ($searchTerm) {
                 $query->where('first_name', 'like', "%$searchTerm%")
-                      ->orWhere('middle_name', 'like', "%$searchTerm%")
-                      ->orWhere('last_name', 'like', "%$searchTerm%")
-                      ->orWhere('email', 'like', "%$searchTerm%")
-                      ->orWhere('phone', 'like', "%$searchTerm%");
+                    ->orWhere('middle_name', 'like', "%$searchTerm%")
+                    ->orWhere('last_name', 'like', "%$searchTerm%")
+                    ->orWhere('email', 'like', "%$searchTerm%")
+                    ->orWhere('phone', 'like', "%$searchTerm%");
             });
         }
         return $query;
@@ -104,9 +104,10 @@ class User extends Authenticatable
         return $query->where($filters);
     }
 
+
     public function profiles()
     {
-        return $this->hasMany(Profile::class);
+        return $this->hasMany(Profile::class, 'user_id');
     }
 
 
