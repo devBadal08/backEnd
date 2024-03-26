@@ -30,6 +30,7 @@ class UserResource extends JsonResource
             'first_name' => $this->first_name,
             'middle_name' => $this->middle_name,
             'last_name' => $this->last_name,
+            'max_profiles_limit' => $this->max_profiles_limit,
             'dob' => $this->dob,
             'gender' => $this->gender,
             'phone' => $this->phone,
