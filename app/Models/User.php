@@ -25,6 +25,7 @@ class User extends Authenticatable
         'first_name',
         'middle_name',
         'last_name',
+        'max_profiles_limit',
         'dob',
         'gender',
         'phone',

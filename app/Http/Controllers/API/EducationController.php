@@ -49,6 +49,104 @@ class EducationController extends Controller
         return response()->json(['data' => $profileEducation]);
     }
 
+    // Update education for a profile
+    // public function updateEducation(Request $request)
+    // {
+    //     // Validation
+    //     $validator = Validator::make($request->all(), [
+    //         'profile_id' => 'required',
+    //         'education' => 'required|array', // Ensure education is an array
+    //     ]);
+
+    //     if ($validator->fails()) {
+    //         return response()->json($validator->errors(), 422);
+    //     }
+
+    //     // Handle education update
+    //     $profileId = $request->profile_id;
+    //     $educations = $request->education;
+
+    //     foreach ($educations as $education) {
+    //         $educationArr = json_decode($education);
+
+    //         $educationId = $educationArr->id; // Assuming you're passing education ID for update
+
+    //         // Find the education record to update
+    //         $profileEducation = ProfileEducation::where('id', $educationId)
+    //             ->where('profile_id', $profileId)
+    //             ->first();
+
+    //         if ($profileEducation) {
+    //             // Update education fields
+    //             $profileEducation->update([
+    //                 'type' => $educationArr->type,
+    //                 'organization_name' => $educationArr->organization_name,
+    //                 'degree' => $educationArr->degree,
+    //                 'start_year' => $educationArr->start_year,
+    //                 'end_year' => $educationArr->end_year,
+    //             ]);
+    //         }
+    //     }
+
+    //     // Fetch updated education data for the profile
+    //     $updatedProfileEducation = ProfileEducation::where('profile_id', $profileId)->get();
+
+    //     return response()->json(['data' => $updatedProfileEducation]);
+    // }
+
+    // Update education for a profile
+public function updateEducation(Request $request)
+{
+    // Validation
+    $validator = Validator::make($request->all(), [
+        'profile_id' => 'required',
+        'education' => 'required|array', // Ensure education is an array
+    ]);
+
+    if ($validator->fails()) {
+        return response()->json($validator->errors(), 422);
+    }
+
+    // Handle education update
+    $profileId = $request->profile_id;
+    $educations = $request->education;
+
+    foreach ($educations as $education) {
+        $educationArr = json_decode($education);
+
+        if (!isset($educationArr->id)) {
+            // If ID is not provided, skip this education item
+            continue;
+        }
+
+        $educationId = $educationArr->id;
+
+        // Find the education record to update
+        $profileEducation = ProfileEducation::where('id', $educationId)
+            ->where('profile_id', $profileId)
+            ->first();
+
+        if ($profileEducation) {
+            // Update education fields
+            $profileEducation->update([
+                'type' => $educationArr->type,
+                'organization_name' => $educationArr->organization_name,
+                'degree' => $educationArr->degree,
+                'start_year' => $educationArr->start_year,
+                'end_year' => $educationArr->end_year,
+            ]);
+        }
+    }
+
+    // Fetch updated education data for the profile
+    $updatedProfileEducation = ProfileEducation::where('profile_id', $profileId)->get();
+
+    return response()->json(['data' => $updatedProfileEducation]);
+}
+
+
+
+
     //Update the edcuation of profile
     // public function updateEducation(Request $request, $id)
     // {
@@ -95,39 +193,39 @@ class EducationController extends Controller
     //     return response()->json(['data' => $profileEducation]);
     // }
 
-    //Update the edcuation of profile
-    public function updateEducation(Request $request, $profile_id)
-    {
-        // Validation for required fields
-        $validator = Validator::make($request->all(), [
-            'profile_id' => 'required',
-            'education' => 'required|array',
-        ]);
+    // //Update the edcuation of profile
+    // public function updateEducation(Request $request, $profile_id)
+    // {
+    //     // Validation for required fields
+    //     $validator = Validator::make($request->all(), [
+    //         'profile_id' => 'required',
+    //         'education' => 'required|array',
+    //     ]);
 
-        if ($validator->fails()) {
-            return response()->json($validator->errors(), 422);
-        }
+    //     if ($validator->fails()) {
+    //         return response()->json($validator->errors(), 422);
+    //     }
 
-        // Update education records
-        if ($request->has('education') && !empty($request->education)) {
-            $educations = $request->education;
-            foreach ($educations as $education) {
-                ProfileEducation::where('profile_id', $profile_id)
-                    ->where('id', $education['id']) // Assuming each education record has an 'id' field
-                    ->update([
-                        'profile_id' => $request->profile_id,
-                        'type' => $education['type'],
-                        'organization_name' => $education['organization_name'],
-                        'degree' => $education['degree'],
-                        'start_year' => $education['start_year'],
-                        'end_year' => $education['end_year']
-                        
-                    ]);
-            }
-        }
+    //     // Update education records
+    //     if ($request->has('education') && !empty($request->education)) {
+    //         $educations = $request->education;
+    //         foreach ($educations as $education) {
+    //             ProfileEducation::where('profile_id', $profile_id)
+    //                 ->where('id', $education['id']) // Assuming each education record has an 'id' field
+    //                 ->update([
+    //                     'profile_id' => $request->profile_id,
+    //                     'type' => $education['type'],
+    //                     'organization_name' => $education['organization_name'],
+    //                     'degree' => $education['degree'],
+    //                     'start_year' => $education['start_year'],
+    //                     'end_year' => $education['end_year']
 
-        // Retrieve and return updated education records
-        $updatedEducations = ProfileEducation::where('profile_id', $profile_id)->get();
-        return response()->json(['data' => $updatedEducations]);
-    }
+    //                 ]);
+    //         }
+    //     }
+
+    //     // Retrieve and return updated education records
+    //     $updatedEducations = ProfileEducation::where('profile_id', $profile_id)->get();
+    //     return response()->json(['data' => $updatedEducations]);
+    // }
 }

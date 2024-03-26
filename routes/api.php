@@ -73,7 +73,8 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
 
     Route::controller(ProfileController::class)->group(function () {
         Route::get('{id}/profiles', 'index');
-        Route::post('profile/personal/store', 'store');
+        Route::post('profile/personal/store', 'store')->middleware('check.profile.limit');
+        // Route::post('/profiles', [ProfileController::class, 'store'])->middleware('check.profile.limit');
         Route::post('{id}/profile/update', 'profileUpdate');
         Route::delete('{id}/profile/delete', 'destroy');
 
@@ -83,7 +84,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     // Routes for profile education
     Route::controller(EducationController::class)->group(function () {
         Route::post('profile/education/store', 'storeEducation');
-        Route::post('{id}/education/update', 'updateEducation');
+        Route::post('education/update', 'updateEducation');
 
 
     });

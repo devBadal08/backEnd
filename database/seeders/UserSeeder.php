@@ -16,14 +16,14 @@ class UserSeeder extends Seeder
     public function run(): void
     {
 
-        //manager permition for admin
+        //manager permissions for admin
         $manager_list = Permission::create(['name' => 'manager.list']);
         $manager_view = Permission::create(['name' => 'manager.view']);
         $manager_create = Permission::create(['name' => 'manager.create']);
         $manager_update = Permission::create(['name' => 'manager.update']);
         $manager_delete = Permission::create(['name' => 'manager.delete']);
 
-        //user Permitions for manager
+        //user permissions for manager
         $user_list = Permission::create(['name' => 'user.list']);
         $user_view = Permission::create(['name' => 'user.view']);
         $user_create = Permission::create(['name' => 'user.create']);
@@ -36,7 +36,7 @@ class UserSeeder extends Seeder
         $profile_update = Permission::create(['name' => 'profile.update']);
         $profile_delete = Permission::create(['name' => 'profile.delete']);
 
-        //profile permition for user
+        //profile permissions for user
         $profile_list = Permission::create(['name' => 'profile.list']);
 
 

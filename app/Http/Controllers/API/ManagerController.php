@@ -90,6 +90,7 @@ class ManagerController extends Controller
             'password' => 'required|string|min:8',
             'password_confirmation' => 'required|same:password', // Add password validation
             'phone' => 'required|numeric|digits:10',
+            'max_profiles_limit' => 'required|numeric|digits:5',
             // 'image' => 'required|mimes:jpeg,jpg,png,gif|max:500' //image validation
         ]);
 
@@ -102,6 +103,7 @@ class ManagerController extends Controller
         $manager->email = $request->email;
         $manager->password = bcrypt($request->password);
         $manager->phone = $request->phone;
+        $manager->max_profiles_limit = $request->max_profiles_limit;
         //UPLOAD IMAGE
         // $imageName = time() . '.' . $request->image->extension();
         // $request->image->move(public_path('images/managers'), $imageName);
@@ -152,6 +154,7 @@ class ManagerController extends Controller
             'password' => 'nullable|confirmed|min:8', // Password is optional, but if provided, needs confirmation and minimum length
             'password_confirmation' => 'nullable|required_with:password', // Confirmation required only if password is provided
             'phone' => 'required|numeric|digits:10',
+            'max_profiles_limit' => 'required|numeric|digits:5',
 
             // 'image' => 'required|mimes:jpeg,jpg,png,gif|max:500' //image validation
         ]);
@@ -170,6 +173,7 @@ class ManagerController extends Controller
             'last_name' => $request->last_name,
             'email' => $request->email,
             'phone' => $request->phone,
+            'max_profiles_limit' => $request->max_profiles_limit,
             // 'password_confirmation' => 'same:password',
             // 'image' => 'nullable|mimes:jpeg,jpg,png,gif|max:500',
         ];

@@ -103,8 +103,16 @@ class ProfileController extends Controller
             return response()->json($validator->errors(), 422);
         }
 
-        $user = Auth::user(); // Get currently logged-in user
+        // $user = Auth::user(); // Get currently logged-in user
 
+        // Assuming the authenticated user is the manager creating the profile
+        $user = $request->user();
+        
+        // Check if the user has reached their maximum profile limit
+        $profilesCount = $user->profiles()->count();
+        if ($profilesCount >= $user->max_profiles_limit) {
+            return response()->json(['error' => 'Maximum limit reached for adding profiles under this manager.'], 403);
+        }
         // Calculate the age from DOB and Store it 
         $dob = $request->dob;
         $age = \Carbon\Carbon::parse($dob)->diff(\Carbon\Carbon::now())->format('%y');
@@ -120,6 +128,7 @@ class ProfileController extends Controller
 
         // $profile->user_id = $user->id; 
         $profile->user_id = Auth::id(); // Associate profile with manager
+        // $profile->user_id = $user->id; // Assuming the user_id field in the profiles table
         $profile->first_name = $request->first_name;
         $profile->middle_name = $request->middle_name;
         $profile->last_name = $request->last_name;
