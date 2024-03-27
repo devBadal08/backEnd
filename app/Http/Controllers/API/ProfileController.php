@@ -18,7 +18,7 @@ class ProfileController extends Controller
     // To list the all profile under a particular manager
     public function index(Request $request, $id)
     {
-        // $manager = User::findOrFail($id);
+        $manager = User::findOrFail($id);
         // $profiles = (($manager->profiles)->paginate(1));
         $perPage = $request->query('per_page', 10);
         $minAge = $request->query('min_age');
@@ -29,7 +29,8 @@ class ProfileController extends Controller
         $state = $request->query('state');
         $searchTerm = $request->query('keyword');
 
-        $profilesQuery = Profile::where('user_id', auth()->user()->id)
+        // $profilesQuery = Profile::where('user_id', auth()->user()->id)
+        $profilesQuery = Profile::where('user_id', $manager->id)
             ->with('educations');
 
         if (isset($searchTerm) && !empty($searchTerm)) {
@@ -252,7 +253,7 @@ class ProfileController extends Controller
             return response()->json(['error' => 'Unauthorized deletion'], 403);
         }
         // Delete education data associated with the profile (assuming foreign key)
-        $profile->education()->delete();
+        $profile->educations()->delete();
 
         // Delete the profile itself
         $profile->delete();
