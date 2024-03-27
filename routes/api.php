@@ -12,7 +12,7 @@ use App\Http\Controllers\Api\{
     Usercontroller,
     ProfileController,
     EducationController,
-
+    DashboardController,
 };
 
 /*
@@ -77,20 +77,17 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
         // Route::post('/profiles', [ProfileController::class, 'store'])->middleware('check.profile.limit');
         Route::post('{id}/profile/update', 'profileUpdate');
         Route::delete('{id}/profile/delete', 'destroy');
-
-
     });
 
     // Routes for profile education
     Route::controller(EducationController::class)->group(function () {
         Route::post('profile/education/store', 'storeEducation');
         Route::post('education/update', 'updateEducation');
-
-
     });
 
+//Route for dashboard
+    Route::get('/dashboard', [DashboardController::class, 'index']);
+
     //Routes for admin to get all user and manager simultaneously
-
-Route::get('allmembers', [AdminController::class, 'index']);
-
+    Route::get('allmembers', [AdminController::class, 'index']);
 });
