@@ -224,16 +224,16 @@ class UserController extends Controller
 
             // $validator = $request->validate([
             'first_name' => 'required|string|max:255',
-            'middle_name' => 'required|string|max:255',
+            // 'middle_name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
-            'dob' => 'required',
-            'gender' => 'required',
+            // 'dob' => 'required',
+            // 'gender' => 'required',
             'phone' => 'required|numeric|digits:10',
             'alt_phone' => 'nullable|numeric|digits:10',
             'password' => 'nullable|confirmed|min:8', // Password is optional, but if provided, needs confirmation and minimum length
             'password_confirmation' => 'nullable|required_with:password', // Confirmation required only if password is provided
-            'username' => 'required',
-            'marital_status' => 'required',
+            // 'username' => 'required',
+            // 'marital_status' => 'required',
             'village' => 'nullable',
             'city' => 'nullable',
             'state' => 'nullable',

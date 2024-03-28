@@ -25,7 +25,7 @@ class UserResource extends JsonResource
             'permissions' => $this->permissions->pluck('name') ?? [],
 
             'image_url' => $this->image ? asset('images/users/' . $this->image) : null,
-            'image_url' => $this->image ? asset('images/profiles/' . $this->image) : null,
+            // 'image_url' => $this->image ? asset('images/profiles/' . $this->image) : null,
             'id' => $this->id,
             'user_id' => $this->user_id,
             'first_name' => $this->first_name,
