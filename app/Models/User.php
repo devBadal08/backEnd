@@ -9,6 +9,7 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class User extends Authenticatable
 {
@@ -108,7 +109,12 @@ class User extends Authenticatable
 
     public function profiles()
     {
-        return $this->hasMany(Profile::class, 'user_id');
+        $url = asset('images/profiles/');
+        // return $this->hasMany(Profile::class, 'user_id')->select(DB::raw("CONCAT(" . $url . ", image) AS image_url"));
+        return $this->hasMany(Profile::class, 'user_id')
+            ->selectRaw("*, CONCAT('$url', '/', image) AS image_url");
+
+        // ->selectRaw('*, CONCAT('.$url.', image) As image_url');
     }
 
 
