@@ -12,13 +12,12 @@ use Illuminate\Support\Facades\Validator;
 
 class EducationController extends Controller
 {
-    // education store of profile
+    // store education of profile
     public function storeEducation(Request $request)
     {
-
         //validation
         $validator = Validator::make($request->all(), [
-            'profile_id' => 'required',
+            'profile_id' => 'required|exists:profiles,id',
             'education' => 'required',
         ]);
 
@@ -30,18 +29,15 @@ class EducationController extends Controller
         if (isset($request->education) && !empty($request->education)) {
             $educations = $request->input('education', []);
             foreach ($educations as $education) {
-                $educationArr = json_decode($education);
-                // print_r($educationArr->degree);
-                // die();
+                // $educationArr = json_decode($education);
                 $postData = [
-                    'profile_id' => $request->profile_id,
-                    'type' => $educationArr->type,
-                    'organization_name' => $educationArr->organization_name,
-                    'degree' => $educationArr->degree,
-                    'start_year' => $educationArr->start_year,
-                    'end_year' => $educationArr->end_year
+                    'profile_id' => $request['profile_id'],
+                    'type' => $education['type'],
+                    'organization_name' => $education['organization_name'],
+                    'degree' => $education['degree'],
+                    'start_year' => $education['start_year'],
+                    'end_year' => $education['end_year']
                 ];
-
                 $profileEducation = ProfileEducation::create($postData);
             }
         }
@@ -49,13 +45,13 @@ class EducationController extends Controller
         return response()->json(['data' => $profileEducation]);
     }
 
-    // Update education for a profile final
+    // Update education for a profile
     public function updateEducation(Request $request)
     {
         // Validation
         $validator = Validator::make($request->all(), [
-            'profile_id' => 'required',
-            'education' => 'required|array', // Ensure education is an array
+            'profile_id' =>'required|exists:profiles,id',
+            'education' => 'required', 
         ]);
 
         if ($validator->fails()) {
@@ -67,13 +63,12 @@ class EducationController extends Controller
         $educations = $request->education;
         // print_r($educations); exit;
 
-
         foreach ($educations as $education) {
-            $educationArr = json_decode($education);
+            // $educationArr = json_decode($education);
             // print_r($education); exit;
             // print_r($educationArr); exit;
 
-            $educationId = isset($educationArr->id) ? $educationArr->id : ''; // Assuming you're passing education ID for update
+            $educationId = isset($education->id) ? $education->id : ''; // Assuming you're passing education ID for update
 
             // Find the education record to update
             // $profileEducation = ProfileEducation::where('id', $educationId)
@@ -85,11 +80,11 @@ class EducationController extends Controller
 
             // print_r($profileEducation); exit;
             $postData = [
-                'type' => $educationArr->type,
-                'organization_name' => $educationArr->organization_name,
-                'degree' => $educationArr->degree,
-                'start_year' => $educationArr->start_year,
-                'end_year' => $educationArr->end_year,
+                'type' => $education['type'],
+                'organization_name' => $education['organization_name'],
+                'degree' => $education['degree'],
+                'start_year' => $education['start_year'],
+                'end_year' => $education['end_year'],
             ];
             // Update education fields
             $matchArr = [

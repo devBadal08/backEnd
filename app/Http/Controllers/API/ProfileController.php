@@ -68,6 +68,16 @@ class ProfileController extends Controller
         return ProfileResource::collection($profilesQuery->paginate($perPage));
     }
 
+     /**
+     * Display the specified resource.
+     */
+    public function show(Request $request, $id)
+    {
+
+        $profile = Profile::where('id', $id)->first();
+        return response()->json($profile);
+    }
+
 
     // To create the profile with personal information under a particular manager
     public function store(Request $request)

@@ -73,6 +73,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
 
     Route::controller(ProfileController::class)->group(function () {
         Route::get('{id}/profiles', 'index');
+        Route::post('{id}/profile/show', 'show');
         Route::post('profile/personal/store', 'store')->middleware('check.profile.limit');
         // Route::post('/profiles', [ProfileController::class, 'store'])->middleware('check.profile.limit');
         Route::post('{id}/profile/update', 'profileUpdate');
@@ -85,7 +86,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
         Route::post('education/update', 'updateEducation');
     });
 
-//Route for dashboard
+    //Route for dashboard
     Route::get('/dashboard', [DashboardController::class, 'index']);
 
     //Routes for admin to get all user and manager simultaneously
