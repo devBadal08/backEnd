@@ -75,7 +75,8 @@ class ProfileController extends Controller
     {
 
         $profile = Profile::where('id', $id)->first();
-        return response()->json($profile);
+        // return response()->json($profile);
+        return new ProfileResource($profile);
     }
 
 
@@ -159,12 +160,10 @@ class ProfileController extends Controller
         $profile->hobbies = $request->hobbies;
         $profile->about_self = $request->about_self;
         $profile->about_job = $request->about_job;
-
         // Set other profile fields from request
         $profile->save();
-        return response()->json($profile);
-        // dd($profile);
-
+        return new ProfileResource($profile);
+        // return response()->json($profile);
     }
 
     // To update the profile by a manager
@@ -249,7 +248,8 @@ class ProfileController extends Controller
 
         $profile->update($postParams);
 
-        return response()->json($profile, 200);
+        return new ProfileResource($profile);
+        // return response()->json($profile, 200);
     }
 
     //To Delete a profile

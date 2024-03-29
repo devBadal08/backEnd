@@ -40,9 +40,10 @@ class AdminController extends Controller
     $state = $request->query('state');
     $searchTerm = $request->query('keyword');
 
-    $managersQuery = User::where('role', 'manager')
-      ->with('profiles')
-      ->get();
+    // $managersQuery = User::where('role', 'manager')
+    //   ->with('profiles')
+    //   ->get();
+      $managersQuery = User::where('role', 'manager')->with(['profiles']);
 
     if (isset($searchTerm) && !empty($searchTerm)) {
       $managersQuery->filterBySearch($searchTerm);

@@ -31,7 +31,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 
-//ROute for log-in
+//Route for log-in
 Route::post('login', [LoginController::class, 'login']);
 
 //Route for register (currently not in use)
@@ -42,7 +42,6 @@ Route::post('reset-link', [PasswordResetRequestController::class, 'sendEmail']);
 
 //Route for change password
 Route::post('reset-password', [NewPasswordController::class, 'reset']);
-
 
 Route::group(['middleware' => ['auth:sanctum']], function () {
 

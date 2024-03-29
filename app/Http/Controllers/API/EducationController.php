@@ -45,13 +45,13 @@ class EducationController extends Controller
         return response()->json(['data' => $profileEducation]);
     }
 
-    // Update education for a profile
+    //update education for a profile
     public function updateEducation(Request $request)
     {
         // Validation
         $validator = Validator::make($request->all(), [
-            'profile_id' =>'required|exists:profiles,id',
-            'education' => 'required', 
+            'profile_id' => 'required|exists:profiles,id',
+            'education' => 'required|array',
         ]);
 
         if ($validator->fails()) {
@@ -61,24 +61,11 @@ class EducationController extends Controller
         // Handle education update
         $profileId = $request->profile_id;
         $educations = $request->education;
-        // print_r($educations); exit;
 
         foreach ($educations as $education) {
-            // $educationArr = json_decode($education);
-            // print_r($education); exit;
-            // print_r($educationArr); exit;
+            $educationId = isset($education['id']) ? $education['id'] : ''; // Access 'id' as an array element
 
-            $educationId = isset($education->id) ? $education->id : ''; // Assuming you're passing education ID for update
-
-            // Find the education record to update
-            // $profileEducation = ProfileEducation::where('id', $educationId)
-            //     ->where('profile_id', $profileId)
-            //     ->first();
-
-            // print_r($profileEducation); exit;
-
-
-            // print_r($profileEducation); exit;
+            // Update education fields
             $postData = [
                 'type' => $education['type'],
                 'organization_name' => $education['organization_name'],
@@ -86,7 +73,8 @@ class EducationController extends Controller
                 'start_year' => $education['start_year'],
                 'end_year' => $education['end_year'],
             ];
-            // Update education fields
+
+            // Update or create education record
             $matchArr = [
                 'profile_id' => $profileId,
                 'id' => $educationId,
