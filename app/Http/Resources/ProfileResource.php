@@ -14,20 +14,7 @@ class ProfileResource extends JsonResource
      */
     public function toArray($request)
     {
-        // return parent::toArray($request);
-        // $additionalFields = [
-        // //     'first_name'=> $request->first_name,
-        // //     'first_name'=> $request->first_name,
-        // //     'first_name'=> $request->first_name,
-        // //     'first_name'=> $request->first_name,
-        // //     'image'=> fullURL(public\images\profiles).'/'.$request->image,
-        // 'image' => $this->image ? asset('storage/' . $this->image) : null,
-        // ];
-
-        // Get all fields of the profile model
-        // $ProfileFields = $this->resource->toArray();
-    
-        // Merge additional fields
+        // Profile fields 
         $ProfileFields = [
             'image_url' => $this->image ? asset('images/profiles/' . $this->image) : null,
             'id' => $this->id,
@@ -36,6 +23,7 @@ class ProfileResource extends JsonResource
             'middle_name' => $this->middle_name,
             'last_name' => $this->last_name,
             'dob' => $this->dob,
+            'age' => $this->age,
             'gender' => $this->gender,
             'phone' => $this->phone,
             'alt_phone' => $this->alt_phone,
@@ -52,9 +40,7 @@ class ProfileResource extends JsonResource
             'about_job' => $this->about_job,
             'educations' => $this->educations,
         ];
-    
-        // Merge all fields together
-        // return array_merge($ProfileFields, $additionalFields);
+
         return $ProfileFields;
     }
 }

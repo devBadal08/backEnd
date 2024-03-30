@@ -8,18 +8,15 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Profile;
-use Spatie\Permission\Models\Permission;
 use Illuminate\Support\Facades\Validator;
-use Spatie\Permission\Traits\HasRoles;
 use Illuminate\Validation\Rule;
 
 class ProfileController extends Controller
 {
-    // To list the all profile under a particular manager
+    // To list the all profile under a particular manager with educationk
     public function index(Request $request, $id)
     {
         $manager = User::findOrFail($id);
-        // $profiles = (($manager->profiles)->paginate(1));
         $perPage = $request->query('per_page', 10);
         $minAge = $request->query('min_age');
         $birthYear = $request->query('birth_year');
@@ -29,13 +26,11 @@ class ProfileController extends Controller
         $state = $request->query('state');
         $searchTerm = $request->query('keyword');
 
-        // $profilesQuery = Profile::where('user_id', auth()->user()->id)
         $profilesQuery = Profile::where('user_id', $manager->id)
             ->with('educations');
 
         if (isset($searchTerm) && !empty($searchTerm)) {
             $profilesQuery->filterBySearch($searchTerm);
-            
         }
         if (isset($minAge) && !empty($minAge)) {
             $profilesQuery->filterByAge($minAge);
@@ -56,26 +51,23 @@ class ProfileController extends Controller
             $profilesQuery->filterByLocation($village, $city, $state);
         }
 
-
-        // if ($minAge || $birthYear || $gender || $village || $city || $state) {
-        //     $profilesQuery->filterByAge($minAge)
-        //         ->filterByBirthYear($birthYear)
-        //         ->filterByGender($gender)
-        //         ->filterByLocation($village, $city, $state);
-        // }
-
-        // print_r($profilesQuery->paginate($perPage)->toArray());exit;
         return ProfileResource::collection($profilesQuery->paginate($perPage));
     }
 
-     /**
+    /**
      * Display the specified resource.
      */
+
+    //Display the individual profile
     public function show(Request $request, $id)
     {
+        // Check if the profile with the provided ID exists
+        $profile = Profile::find($id);
 
-        $profile = Profile::where('id', $id)->first();
-        // return response()->json($profile);
+        if (!$profile) {
+            return response()->json(['error' => 'Profile not found'], 404);
+        }
+
         return new ProfileResource($profile);
     }
 
@@ -108,23 +100,21 @@ class ProfileController extends Controller
             'about_self' => 'required',
             'about_job' => 'required',
             'image' => 'required|mimes:jpeg,jpg,png,gif|max:500', //image validation
-            // 'education' => 'required',
         ]);
 
         if ($validator->fails()) {
             return response()->json($validator->errors(), 422);
         }
 
-        // $user = Auth::user(); // Get currently logged-in user
-
         // Assuming the authenticated user is the manager creating the profile
         $user = $request->user();
-        
+
         // Check if the user has reached their maximum profile limit
         $profilesCount = $user->profiles()->count();
         if ($profilesCount >= $user->max_profiles_limit) {
             return response()->json(['error' => 'Maximum limit reached for adding profiles under this manager.'], 403);
         }
+
         // Calculate the age from DOB and Store it 
         $dob = $request->dob;
         $age = \Carbon\Carbon::parse($dob)->diff(\Carbon\Carbon::now())->format('%y');
@@ -136,11 +126,8 @@ class ProfileController extends Controller
             $request->image->move(public_path('images/profiles'), $imageName);
             $profile->image = $imageName;
         }
-        // dd($request);
 
-        // $profile->user_id = $user->id; 
         $profile->user_id = Auth::id(); // Associate profile with manager
-        // $profile->user_id = $user->id; // Assuming the user_id field in the profiles table
         $profile->first_name = $request->first_name;
         $profile->middle_name = $request->middle_name;
         $profile->last_name = $request->last_name;
@@ -163,14 +150,14 @@ class ProfileController extends Controller
         // Set other profile fields from request
         $profile->save();
         return new ProfileResource($profile);
-        // return response()->json($profile);
     }
 
-    // To update the profile by a manager
+    // Update the profile by a manager
     public function profileUpdate(Request $request, $id)
     {
         $profile = auth()->user();
 
+        //vadlidation
         $validator = Validator::make($request->all(), [
             'first_name' => 'required|string|max:255',
             'middle_name' => 'required|string|max:255',
@@ -182,7 +169,7 @@ class ProfileController extends Controller
             'email' => [
                 'required',
                 'email',
-                Rule::unique('profiles')->ignore($id)
+                Rule::unique('profiles')->ignore($id) //email validation
             ],
             'password' => 'nullable|confirmed|min:8', // Password is optional, but if provided, needs confirmation and minimum length
             'password_confirmation' => 'nullable|required_with:password', // Confirmation required only if password is provided
@@ -196,8 +183,7 @@ class ProfileController extends Controller
             'hobbies' => 'required',
             'about_self' => 'required',
             'about_job' => 'required',
-            'image' => 'required|mimes:jpeg,jpg,png,gif|max:500', //image validation
-            // 'education' => 'required',
+            'image' => 'nullable|mimes:jpeg,jpg,png,gif|max:500', //image validation
         ]);
 
         if ($validator->fails()) {
@@ -208,16 +194,19 @@ class ProfileController extends Controller
             return response()->json($response, 400);
         }
 
+        // Check if the profile with the provided ID exists
         $profile = Profile::find($id);
+
+        if (!$profile) {
+            return response()->json(['error' => 'Profile not found'], 404);
+        }
+
         $postParams = [
             'first_name' => $request->first_name,
             'middle_name' => $request->middle_name,
             'last_name' => $request->last_name,
             'email' => $request->email,
             'phone' => $request->phone,
-            // 'password' => 'nullable|min:8',
-            // 'c_password' => 'same:password',
-            // 'image' => 'nullable|mimes:jpeg,jpg,png,gif|max:500',
             'dob'  => $request->dob,
             'gender'  => $request->gender,
             'phone'  => $request->phone,
@@ -249,14 +238,17 @@ class ProfileController extends Controller
         $profile->update($postParams);
 
         return new ProfileResource($profile);
-        // return response()->json($profile, 200);
     }
 
-    //To Delete a profile
+    //To Delete a profile with it's education
     public function destroy($id)
     {
-        // echo "here"; exit;
+        // Check if the profile with the provided ID exists
         $profile = Profile::find($id);
+
+        if (!$profile) {
+            return response()->json(['error' => 'Profile not found'], 404);
+        }
 
         // Check if profile belongs to the currently authenticated user 
         if (auth()->user()->id !== $profile->user_id) {

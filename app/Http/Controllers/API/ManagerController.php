@@ -66,8 +66,6 @@ class ManagerController extends Controller
         return UserResource::collection($managersQuery->paginate($perPage));
 
         // return response()->json($managerQuery->paginate($perPage));
-
-
     }
 
     public function store(Request $request)
@@ -78,7 +76,11 @@ class ManagerController extends Controller
         $user_create = Permission::where(['name' => 'user.create'])->first();
         $user_update = Permission::where(['name' => 'user.update'])->first();
         $user_delete = Permission::where(['name' => 'user.delete'])->first();
-
+        $profile_list = Permission::where(['name' => 'profile.list']);
+        $profile_view = Permission::where(['name' => 'profile.view']);
+        $profile_create = Permission::where(['name' => 'profile.create']);
+        $profile_update = Permission::where(['name' => 'profile.update']);
+        $profile_delete = Permission::where(['name' => 'profile.delete']);
 
         $manager = new User();
 
@@ -104,11 +106,13 @@ class ManagerController extends Controller
         $manager->password = bcrypt($request->password);
         $manager->phone = $request->phone;
         $manager->max_profiles_limit = $request->max_profiles_limit;
+
         //UPLOAD IMAGE
         // $imageName = time() . '.' . $request->image->extension();
         // $request->image->move(public_path('images/managers'), $imageName);
         // print_r($img); exit;
         // $manager->image = $imageName;   //store image name
+
         $manager->role = 'manager';
         $manager->save();
 
@@ -118,18 +122,27 @@ class ManagerController extends Controller
             $user_list,
             $user_update,
             $user_view,
-            $user_delete
+            $user_delete,
+            $profile_list,
+            $profile_view,
+            $profile_create,
+            $profile_update,
+            $profile_delete,
 
         ]);
-
-        return response()->json($manager);
+        return new UserResource($manager);
     }
 
     public function show(Request $request, $id)
     {
+        // Check if the manager with the provided ID exists
+        $manager = User::find($id);
 
-        $manager = User::where('id', $id)->first();
-        return response()->json($manager);
+        if (!$manager) {
+            return response()->json(['error' => 'manager not found'], 404);
+        }
+
+        return new UserResource($manager);
     }
 
     public function edit(Request $request, $id)
@@ -155,7 +168,6 @@ class ManagerController extends Controller
             'password_confirmation' => 'nullable|required_with:password', // Confirmation required only if password is provided
             'phone' => 'required|numeric|digits:10',
             'max_profiles_limit' => 'required|numeric',
-
             // 'image' => 'required|mimes:jpeg,jpg,png,gif|max:500' //image validation
         ]);
 
@@ -167,14 +179,19 @@ class ManagerController extends Controller
             return response()->json($response, 400);
         }
 
+        // Check if the manager with the provided ID exists
         $manager = User::find($id);
+
+        if (!$manager) {
+            return response()->json(['error' => 'manager not found'], 404);
+        }
+
         $postParams = [
             'first_name' => $request->first_name,
             'last_name' => $request->last_name,
             'email' => $request->email,
             'phone' => $request->phone,
             'max_profiles_limit' => $request->max_profiles_limit,
-            // 'password_confirmation' => 'same:password',
             // 'image' => 'nullable|mimes:jpeg,jpg,png,gif|max:500',
         ];
 
@@ -189,48 +206,26 @@ class ManagerController extends Controller
         }
 
         $manager->update($postParams);
-
-        return response()->json($manager, 200);
+        return new UserResource($manager);
     }
 
-    public function update(Request $request, $id)  //Manager Update itself
+    //Manager Update itself
+    public function update(Request $request, $id)
     {
-
         $manager = auth()->user();
-        // dd($user);
-        // echo "here"; exit;
-        // print_r($user); exit;
-        // Define validation rules considering required password
-        $validator = Validator::make($request->all(), [
 
-            // $validator = $request->validate([
+        //Validation
+        $validator = Validator::make($request->all(), [
             'first_name' => 'required|string|max:255',
-            'middle_name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
-            'dob' => 'required',
-            'gender' => 'required',
             'phone' => 'required',
-            'alt_phone' => 'nullable',
+            // 'alt_phone' => 'nullable',
             'password' => 'nullable|confirmed|min:8', // Password is optional, but if provided, needs confirmation and minimum length
             'password_confirmation' => 'nullable|required_with:password', // Confirmation required only if password is provided
-            'username' => 'required',
-            'marital_status' => 'required',
-            'village' => 'nullable',
-            'city' => 'nullable',
-            'state' => 'nullable',
-            'height' => 'nullable',
-            'weight' => 'nullable',
-            'hobbies' => 'nullable',
-            'about_self' => 'nullable',
-            'about_job' => 'nullable',
-            'image' => 'nullable|mimes:jpeg,jpg,png,gif|max:500', //image validation
-            'education' => 'nullable',
-
-            // Add other fields as needed
+            // 'image' => 'nullable|mimes:jpeg,jpg,png,gif|max:500', //image validation
+            // Add other fields if needed
         ]);
-        $dob = $request->dob;
 
-        // print_r($request); exit;
         if ($validator->fails()) {
             $response = [
                 'success' => false,
@@ -239,37 +234,25 @@ class ManagerController extends Controller
             return response()->json($response, 400);
         }
 
+        // Check if the profile with the provided ID exists
         $manager = User::find($id);
+
+        if (!$manager) {
+            return response()->json(['error' => 'manager not found'], 404);
+        }
 
         $postParams = [
             'first_name' => $request->first_name,
-            'middle_name' => $request->middle_name,
             'last_name' => $request->last_name,
-            'dob' => $request->dob,
-            'gender' => $request->gender,
             'phone' => $request->phone,
-            'alt_phone' => $request->alt_phone,
-            'username' => $request->username,
-            'marital_status' => $request->marital_status,
-            'height' => $request->height,
-            'weight' => $request->weight,
-            'hobbies' => $request->hobbies,
-            'about_self' => $request->about_self,
-            'about_job' => $request->about_job,
-            'image' => $request->image,
-            'education' => $request->education,
-            'village' => $request->village,
-            'city' => $request->city,
-            'state' => $request->state,
+            // 'alt_phone' => $request->alt_phone,
         ];
-        $age = \Carbon\Carbon::parse($dob)->diff(\Carbon\Carbon::now())->format('%y years');
-        $postParams['age'] = $age;
 
-        if (isset($request->image)) {
-            $imageName = time() . '.' . $request->image->extension();
-            $request->image->move(public_path('images/managers'), $imageName);
-            $manager->image = $imageName;
-        }
+        // if (isset($request->image)) {
+        //     $imageName = time() . '.' . $request->image->extension();
+        //     $request->image->move(public_path('images/managers'), $imageName);
+        //     $manager->image = $imageName;
+        // }
 
         if ($request->has('password')) {
             $manager->password = bcrypt($request->password);
@@ -277,8 +260,6 @@ class ManagerController extends Controller
 
         $manager->update($postParams);
 
-        return response()->json($manager, 200);
-        // print_r($id);exit;
-        // echo"here"; exit();
+        return new UserResource($manager);
     }
 }

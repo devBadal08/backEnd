@@ -41,18 +41,18 @@ class Profile extends Model
         'village',
         'city',
         'state',
-        // Other profile fields
+        // Other profile fields if required to add
     ];
 
     public function scopeFilterBySearch($query, $searchTerm)
     {
         if ($searchTerm) {
-            return $query->where(function($query) use ($searchTerm) {
+            return $query->where(function ($query) use ($searchTerm) {
                 $query->where('first_name', 'like', "%$searchTerm%")
-                      ->orWhere('middle_name', 'like', "%$searchTerm%")
-                      ->orWhere('last_name', 'like', "%$searchTerm%")
-                      ->orWhere('email', 'like', "%$searchTerm%")
-                      ->orWhere('phone', 'like', "%$searchTerm%");
+                    ->orWhere('middle_name', 'like', "%$searchTerm%")
+                    ->orWhere('last_name', 'like', "%$searchTerm%")
+                    ->orWhere('email', 'like', "%$searchTerm%")
+                    ->orWhere('phone', 'like', "%$searchTerm%");
             });
         }
         return $query;
@@ -97,7 +97,6 @@ class Profile extends Model
 
         return $query->where($filters);
     }
-
 
     public function user()
     {

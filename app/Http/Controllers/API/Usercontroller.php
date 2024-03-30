@@ -13,9 +13,6 @@ use Illuminate\Validation\Rule;
 
 class UserController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
 
     public function listUsers()
     {
@@ -24,67 +21,45 @@ class UserController extends Controller
         return response()->json($users);
     }
 
+    /**
+     * Display a listing of the resource.
+     */
     public function index(Request $request)
     {
-        // $userQuery = User::where('created_by', auth()->user()->id)->paginate(10);
-        // return response()->json($users);
-
         $perPage = $request->query('per_page', 10);
-        $minAge = $request->query('min_age');
-        $birthYear = $request->query('birth_year');
-        $gender = $request->query('gender');
-        $village = $request->query('village');
-        $city = $request->query('city');
-        $state = $request->query('state');
+        // $minAge = $request->query('min_age');
+        // $birthYear = $request->query('birth_year');
+        // $gender = $request->query('gender');
+        // $village = $request->query('village');
+        // $city = $request->query('city');
+        // $state = $request->query('state');
         $searchTerm = $request->query('keyword');
 
         $usersQuery = User::where('created_by', auth()->user()->id);
 
         if (isset($searchTerm) && !empty($searchTerm)) {
             $usersQuery->filterBySearch($searchTerm);
-            
         }
-        if (isset($minAge) && !empty($minAge)) {
-            $usersQuery->filterByAge($minAge);
-        }
-        if (isset($birthYear) && !empty($birthYear)) {
-            $usersQuery->filterByBirthYear($birthYear);
-        }
-        if (isset($gender) && !empty($gender)) {
-            $usersQuery->filterByGender($gender);
-        }
-        if (isset($village) && !empty($village)) {
-            $usersQuery->filterByLocation($village, $city, $state);
-        }
-        if (isset($city) && !empty($city)) {
-            $usersQuery->filterByLocation($village, $city, $state);
-        }
-        if (isset($state) && !empty($state)) {
-            $usersQuery->filterByLocation($village, $city, $state);
-        }
-
-
-        // if ($minAge || $birthYear || $gender || $village || $city || $state) {
-        //     $users = User::filterByAge($minAge)
-        //         ->filterByBirthYear($birthYear)
-        //         ->filterByGender($gender)
-        //         ->filterByLocation($village, $city, $state)
-        //         ->paginate($perPage);
+        // if (isset($minAge) && !empty($minAge)) {
+        //     $usersQuery->filterByAge($minAge);
+        // }
+        // if (isset($birthYear) && !empty($birthYear)) {
+        //     $usersQuery->filterByBirthYear($birthYear);
+        // }
+        // if (isset($gender) && !empty($gender)) {
+        //     $usersQuery->filterByGender($gender);
+        // }
+        // if (isset($village) && !empty($village)) {
+        //     $usersQuery->filterByLocation($village, $city, $state);
+        // }
+        // if (isset($city) && !empty($city)) {
+        //     $usersQuery->filterByLocation($village, $city, $state);
+        // }
+        // if (isset($state) && !empty($state)) {
+        //     $usersQuery->filterByLocation($village, $city, $state);
         // }
 
-        // return response()->json($userQuery);
-        // return UserResource::collection($userQuery);
         return UserResource::collection($usersQuery->paginate($perPage));
-
-
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
     }
 
     /**
@@ -92,7 +67,6 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
-        // dd($request->user()->id);
         // Permission for user
         $profile_list = Permission::where(['name' => 'profile.list'])->first();
 
@@ -103,10 +77,9 @@ class UserController extends Controller
             'first_name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
             'email' => 'required|email|unique:users',
+            'phone' => 'required|numeric|digits:10',
             'password' => 'required|string|min:8',
             'password_confirmation' => 'required|same:password', // Add password validation
-            'phone' => 'required|numeric|digits:10',
-
             // 'image' => 'required|mimes:jpeg,jpg,png,gif|max:500' //image validation
         ]);
 
@@ -119,11 +92,12 @@ class UserController extends Controller
         $user->email = $request->email;
         $user->password = bcrypt($request->password);
         $user->phone = $request->phone;
+
         //UPLOAD IMAGE
         // $imageName = time() . '.' . $request->image->extension();
         // $request->image->move(public_path('images/users'), $imageName);
-        // // print_r($img); exit;
         // $user->image = $imageName;   //store image name
+
         $user->role = 'user';
         $user->created_by = Auth::id();
         $user->save();
@@ -142,9 +116,14 @@ class UserController extends Controller
      */
     public function show(Request $request, $id)
     {
+        // Check if the user with the provided ID exists
+        $user = User::find($id);
 
-        $user = User::where('id', $id)->first();
-        return response()->json($user);
+        if (!$user) {
+            return response()->json(['error' => 'User not found'], 404);
+        }
+
+        return new UserResource($user);
     }
 
     /**
@@ -152,19 +131,27 @@ class UserController extends Controller
      */
     public function edit(Request $request, $id)
     {
+        // Check if the user with the provided ID exists
         $user = User::find($id);
-        return response()->json($user);
+
+        if (!$user) {
+            return response()->json(['error' => 'User not found'], 404);
+        }
+        return new UserResource($user);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function user_update(Request $request, $id)  // This is the function to update the user by Manager
+    // This is the function to update the user by Manager
+    public function user_update(Request $request, $id)
     {
         $user = auth()->user();
 
+        //Validation
         $validator = Validator::make($request->all(), [
             'first_name' => 'required|string|max:255',
+            'last_name' => 'required|string|max:255',
             'email' => [
                 'required',
                 'email',
@@ -183,15 +170,18 @@ class UserController extends Controller
             return response()->json($response, 400);
         }
 
+        // Check if the user with the provided ID exists
         $user = User::find($id);
+
+        if (!$user) {
+            return response()->json(['error' => 'User not found'], 404);
+        }
+
         $postParams = [
             'first_name' => $request->first_name,
             'last_name' => $request->last_name,
             'email' => $request->email,
             'phone' => $request->phone,
-            // 'password' => 'nullable|min:8',
-            // 'c_password' => 'same:password',
-            // 'image' => 'nullable|mimes:jpeg,jpg,png,gif|max:500',
         ];
 
         // if (isset($request->image)) {
@@ -205,49 +195,26 @@ class UserController extends Controller
         }
 
         $user->update($postParams);
-
-        return response()->json($user, 200);
+        return new UserResource($user);
     }
 
-    public function update(Request $request, $id)  //This is the function to update the user by user itself
+    //This is the function to update the user by user itself
+    public function update(Request $request, $id)
     {
-
-        // print_r($request->all());die();
         $user = auth()->user();
-        // dd($user);
-        // echo "here"; exit;
-        // print_r($user); exit;
 
-
-        // Define validation rules considering required password
+        //Validation
         $validator = Validator::make($request->all(), [
-
-            // $validator = $request->validate([
             'first_name' => 'required|string|max:255',
-            // 'middle_name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
-            // 'dob' => 'required',
-            // 'gender' => 'required',
             'phone' => 'required|numeric|digits:10',
-            'alt_phone' => 'nullable|numeric|digits:10',
+            // 'alt_phone' => 'nullable|numeric|digits:10',
             'password' => 'nullable|confirmed|min:8', // Password is optional, but if provided, needs confirmation and minimum length
             'password_confirmation' => 'nullable|required_with:password', // Confirmation required only if password is provided
-            // 'username' => 'required',
-            // 'marital_status' => 'required',
-            'village' => 'nullable',
-            'city' => 'nullable',
-            'state' => 'nullable',
-            'height' => 'nullable',
-            'weight' => 'nullable',
-            'hobbies' => 'nullable',
-            'about_self' => 'nullable',
-            'about_job' => 'nullable',
-            'image' => 'nullable|mimes:jpeg,jpg,png,gif|max:500',
-            'education' => 'nullable',
-            // Add other fields as needed
+            // 'image' => 'nullable|mimes:jpeg,jpg,png,gif|max:500',
+            // Add other fields if needed
         ]);
 
-        // print_r($request); exit;
         if ($validator->fails()) {
             $response = [
                 'success' => false,
@@ -256,65 +223,49 @@ class UserController extends Controller
             return response()->json($response, 400);
         }
 
+        // Check if the user with the provided ID exists
         $user = User::find($id);
-        $postParams = [
-            'first_name' => $request->first_name,
-            'middle_name' => $request->middle_name,
-            'last_name' => $request->last_name,
-            'dob' => $request->dob,
-            'gender' => $request->gender,
-            'phone' => $request->phone,
-            'alt_phone' => $request->alt_phone,
-            'username' => $request->username,
-            'marital_status' => $request->marital_status,
-            'height' => $request->height,
-            'weight' => $request->weight,
-            'hobbies' => $request->hobbies,
-            'about_self' => $request->about_self,
-            'about_job' => $request->about_job,
-            // 'image' => $request->image,
-            'education' => $request->education,
-            'village' => $request->village,
-            'city' => $request->city,
-            'state' => $request->state,
 
-
-        ];
-
-        // Calculate the age from DOB and Store it 
-        $dob = $request->dob;
-        $age = \Carbon\Carbon::parse($dob)->diff(\Carbon\Carbon::now())->format('%y');
-        $postParams['age'] = $age;
-
-        //Store the image
-        if (isset($request->image)) {
-            $imageName = time() . '.' . $request->image->extension();
-            $request->image->move(public_path('images/users'), $imageName);
-            $user->image = $imageName;
+        if (!$user) {
+            return response()->json(['error' => 'User not found'], 404);
         }
 
-        // Update the passsword if and only if it is provided by the user
+        $postParams = [
+            'first_name' => $request->first_name,
+            'last_name' => $request->last_name,
+            'phone' => $request->phone,
+            'alt_phone' => $request->alt_phone,
+            // 'image' => $request->image,
+        ];
+
+        //Store the image
+        // if (isset($request->image)) {
+        //     $imageName = time() . '.' . $request->image->extension();
+        //     $request->image->move(public_path('images/users'), $imageName);
+        //     $user->image = $imageName;
+        // }
+
         if ($request->has('password')) {
             $user->password = bcrypt($request->password);
         }
 
-        // Update all other attributes rather than image and password
         $user->update($postParams);
-
-        return response()->json($user, 200);
-        // print_r($id);exit;
-        // echo"here"; exit();
+        return new UserResource($user);
     }
-
 
     /**
      * Remove the specified resource from storage.
      */
     public function destroy($id)
     {
-        // echo "here"; exit;
+        // Check if the user with the provided ID exists
         $user = User::find($id);
+
+        if (!$user) {
+            return response()->json(['error' => 'User not found'], 404);
+        }
+
         $user->delete();
-        return response()->json(['message' => 'Profile deleted successfully']);
+        return response()->json(['message' => 'user deleted successfully']);
     }
 }
