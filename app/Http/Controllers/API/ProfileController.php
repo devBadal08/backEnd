@@ -56,9 +56,9 @@ class ProfileController extends Controller
 
     /**
      * Display the specified resource.
+     * Display the individual profile
      */
 
-    //Display the individual profile
     public function show(Request $request, $id)
     {
         // Check if the profile with the provided ID exists
@@ -71,36 +71,18 @@ class ProfileController extends Controller
         return new ProfileResource($profile);
     }
 
-
     // To create the profile with personal information under a particular manager
     public function store(Request $request)
     {
         $profile = new Profile;
 
-        //validation
-        $validator = Validator::make($request->all(), [
-            'first_name' => 'required|string|max:255',
-            'middle_name' => 'required|string|max:255',
-            'last_name' => 'required|string|max:255',
-            'dob' => 'required',
-            'gender' => 'required',
-            'email' => 'required|email|unique:users',
-            'password' => 'required|string|min:8',
-            'password_confirmation' => 'required|same:password', // Add password validation
-            'phone' => 'required|numeric|digits:10',
-            'alt_phone' => 'nullable|numeric|digits:10',
-            'username' => 'required',
-            'marital_status' => 'required',
-            'village' => 'nullable',
-            'city' => 'required',
-            'state' => 'required',
-            'height' => 'required',
-            'weight' => 'required',
-            'hobbies' => 'required',
-            'about_self' => 'required',
-            'about_job' => 'required',
-            'image' => 'required|mimes:jpeg,jpg,png,gif|max:500', //image validation
-        ]);
+        //vadlidation
+        $validator = Validator::make(
+            $request->all(),
+            array_merge(
+                $this->getValidationRules()
+            )
+        );
 
         if ($validator->fails()) {
             return response()->json($validator->errors(), 422);
@@ -156,40 +138,26 @@ class ProfileController extends Controller
     public function profileUpdate(Request $request, $id)
     {
         $profile = auth()->user();
-
-        //vadlidation
-        $validator = Validator::make($request->all(), [
-            'first_name' => 'required|string|max:255',
-            'middle_name' => 'required|string|max:255',
-            'last_name' => 'required|string|max:255',
-            'dob' => 'required',
-            'gender' => 'required',
-            'phone' => 'required|numeric|digits:10',
-            'alt_phone' => 'nullable|numeric|digits:10',
-            'email' => [
+        $emailValidation = ['email' => [
                 'required',
                 'email',
                 Rule::unique('profiles')->ignore($id) //email validation
-            ],
-            'password' => 'nullable|confirmed|min:8', // Password is optional, but if provided, needs confirmation and minimum length
-            'password_confirmation' => 'nullable|required_with:password', // Confirmation required only if password is provided
-            'username' => 'required',
-            'marital_status' => 'required',
-            'village' => 'required',
-            'city' => 'required',
-            'state' => 'required',
-            'height' => 'required',
-            'weight' => 'required',
-            'hobbies' => 'required',
-            'about_self' => 'required',
-            'about_job' => 'required',
-            'image' => 'nullable|mimes:jpeg,jpg,png,gif|max:500', //image validation
-        ]);
+            ]
+        ];
+        //vadlidation
+        $validator = Validator::make(
+            $request->all(),
+            array_merge(
+                $this->getValidationRules(),
+                $emailValidation
+            )
+        );
+        
 
         if ($validator->fails()) {
             $response = [
                 'success' => false,
-                'message' => $validator->errors()
+                'errors' => $validator->errors()
             ];
             return response()->json($response, 400);
         }
@@ -221,14 +189,12 @@ class ProfileController extends Controller
             'hobbies'  => $request->hobbies,
             'about_self'  => $request->about_self,
             'about_job'  => $request->about_job,
-            'image'  => $request->image,
-            'education'  => $request->education,
         ];
 
-        if (isset($request->image)) {
+        if (isset($request->image) && !empty($request->image)) {
             $imageName = time() . '.' . $request->image->extension();
             $request->image->move(public_path('images/profiles'), $imageName);
-            $profile->image = $imageName;
+            $postParams['image'] = $imageName;
         }
 
         if ($request->has('password')) {
@@ -260,5 +226,31 @@ class ProfileController extends Controller
         // Delete the profile itself
         $profile->delete();
         return response()->json(['message' => 'Profile deleted successfully']);
+    }
+
+    private function getValidationRules($isNew = true)
+    {
+        return [
+            'first_name' => 'required|string|max:255',
+            'middle_name' => 'required|string|max:255',
+            'last_name' => 'required|string|max:255',
+            'dob' => 'required',
+            'gender' => 'required',
+            'phone' => 'required|numeric|digits:10',
+            'alt_phone' => 'nullable|numeric|digits:10',
+            'password' => 'nullable|confirmed|min:8', // Password is optional, but if provided, needs confirmation and minimum length
+            'password_confirmation' => 'nullable|required_with:password', // Confirmation required only if password is provided
+            'username' => 'required',
+            'marital_status' => 'required',
+            'village' => 'required',
+            'city' => 'required',
+            'state' => 'required',
+            'height' => 'required',
+            'weight' => 'required',
+            'hobbies' => 'required',
+            'about_self' => 'required',
+            'about_job' => 'required',
+            'image' => 'nullable|mimes:jpeg,jpg,png,gif|max:500', //image validation
+        ];
     }
 }

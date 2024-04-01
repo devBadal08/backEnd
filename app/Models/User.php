@@ -38,10 +38,8 @@ class User extends Authenticatable
     public function scopeFilterBySearch($query, $searchTerm)
     {
         if ($searchTerm) {
-            // dd($searchTerm);
             return $query->where(function ($query) use ($searchTerm) {
                 $query->where('first_name', 'like', "%$searchTerm%")
-                    // ->orWhere('middle_name', 'like', "%$searchTerm%")
                     ->orWhere('last_name', 'like', "%$searchTerm%")
                     ->orWhere('email', 'like', "%$searchTerm%")
                     ->orWhere('phone', 'like', "%$searchTerm%");
@@ -49,47 +47,6 @@ class User extends Authenticatable
         }
         return $query;
     }
-
-    // public function scopeFilterByAge($query, $minAge)
-    // {
-    //     if ($minAge) {
-    //         return $query->where('age', '>=', $minAge);
-    //     }
-    //     return $query;
-    // }
-
-    // public function scopeFilterByBirthYear($query, $birthYear)
-    // {
-    //     if ($birthYear) {
-    //         return $query->whereYear('dob', $birthYear);
-    //     }
-    //     return $query;
-    // }
-
-    // public function scopeFilterByGender($query, $gender)
-    // {
-    //     if ($gender) {
-    //         return $query->where('gender', $gender);
-    //     }
-    //     return $query;
-    // }
-
-    // public function scopeFilterByLocation($query, $village, $city, $state)
-    // {
-    //     $filters = [];
-    //     if ($village) {
-    //         $filters[] = ['village', 'like', "%$village%"];
-    //     }
-    //     if ($city) {
-    //         $filters[] = ['city', 'like', "%$city%"];
-    //     }
-    //     if ($state) {
-    //         $filters[] = ['state', $state];
-    //     }
-
-    //     return $query->where($filters);
-    // }
-
 
     public function profiles()
     {

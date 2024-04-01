@@ -47,7 +47,6 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
 
     //Routes for user
     Route::controller(UserController::class)->group(function () {
-        Route::get('allusers', 'listUsers');
         Route::get('users', 'index');
         Route::get('{id}/user/edit', 'edit');
         Route::post('user/store', 'store');
@@ -85,7 +84,4 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
 
     //Route for dashboard
     Route::get('/dashboard', [DashboardController::class, 'index']);
-
-    //Routes for admin to get all user and manager simultaneously
-    Route::get('allmembers', [AdminController::class, 'index']);
 });

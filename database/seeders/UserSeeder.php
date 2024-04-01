@@ -39,7 +39,6 @@ class UserSeeder extends Seeder
         //profile permissions for user
         $profile_list = Permission::create(['name' => 'profile.list']);
 
-
         //admin
         $admin = User::create([
             'first_name' => 'Admin',
@@ -93,7 +92,6 @@ class UserSeeder extends Seeder
             $profile_create,
             $profile_update,
             $profile_delete,
-
         ]);
 
         $manager->assignRole('manager');

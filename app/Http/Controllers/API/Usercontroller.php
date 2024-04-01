@@ -13,26 +13,12 @@ use Illuminate\Validation\Rule;
 
 class UserController extends Controller
 {
-
-    public function listUsers()
-    {
-        $users = User::where('role', 'user')->get();
-
-        return response()->json($users);
-    }
-
     /**
      * Display a listing of the resource.
      */
     public function index(Request $request)
     {
         $perPage = $request->query('per_page', 10);
-        // $minAge = $request->query('min_age');
-        // $birthYear = $request->query('birth_year');
-        // $gender = $request->query('gender');
-        // $village = $request->query('village');
-        // $city = $request->query('city');
-        // $state = $request->query('state');
         $searchTerm = $request->query('keyword');
 
         $usersQuery = User::where('created_by', auth()->user()->id);
@@ -40,24 +26,6 @@ class UserController extends Controller
         if (isset($searchTerm) && !empty($searchTerm)) {
             $usersQuery->filterBySearch($searchTerm);
         }
-        // if (isset($minAge) && !empty($minAge)) {
-        //     $usersQuery->filterByAge($minAge);
-        // }
-        // if (isset($birthYear) && !empty($birthYear)) {
-        //     $usersQuery->filterByBirthYear($birthYear);
-        // }
-        // if (isset($gender) && !empty($gender)) {
-        //     $usersQuery->filterByGender($gender);
-        // }
-        // if (isset($village) && !empty($village)) {
-        //     $usersQuery->filterByLocation($village, $city, $state);
-        // }
-        // if (isset($city) && !empty($city)) {
-        //     $usersQuery->filterByLocation($village, $city, $state);
-        // }
-        // if (isset($state) && !empty($state)) {
-        //     $usersQuery->filterByLocation($village, $city, $state);
-        // }
 
         return UserResource::collection($usersQuery->paginate($perPage));
     }
@@ -107,9 +75,8 @@ class UserController extends Controller
             $profile_list,
         ]);
 
-        return response()->json($user);
+        return new UserResource($user);
     }
-
 
     /**
      * Display the specified resource.
@@ -165,7 +132,7 @@ class UserController extends Controller
         if ($validator->fails()) {
             $response = [
                 'success' => false,
-                'message' => $validator->errors()
+                'errors' => $validator->errors()
             ];
             return response()->json($response, 400);
         }
@@ -212,13 +179,12 @@ class UserController extends Controller
             'password' => 'nullable|confirmed|min:8', // Password is optional, but if provided, needs confirmation and minimum length
             'password_confirmation' => 'nullable|required_with:password', // Confirmation required only if password is provided
             // 'image' => 'nullable|mimes:jpeg,jpg,png,gif|max:500',
-            // Add other fields if needed
         ]);
 
         if ($validator->fails()) {
             $response = [
                 'success' => false,
-                'message' => $validator->errors()
+                'errors' => $validator->errors()
             ];
             return response()->json($response, 400);
         }
