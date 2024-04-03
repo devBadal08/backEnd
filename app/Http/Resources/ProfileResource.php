@@ -38,6 +38,17 @@ class ProfileResource extends JsonResource
             'hobbies' => $this->hobbies,
             'about_self' => $this->about_self,
             'about_job' => $this->about_job,
+            'father_name' => $this->father_name,
+            'father_occupation' => $this->father_occupation,
+            'mother_name' => $this->mother_name,
+            'mother_occupation' => $this->mother_occupation,
+            'mothers_father_name' => $this->mothers_father_name,
+            'mother_village' => $this->mother_village,
+            'mother_city' => $this->mother_city,
+            'siblings' => $this->siblings,
+            'number_of_brothers' => $this->number_of_brothers,
+            'number_of_sisters' => $this->number_of_sisters,
+            'sibling_comment' => $this->sibling_comment,
             'educations' => $this->educations,
         ];
 

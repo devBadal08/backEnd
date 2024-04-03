@@ -41,6 +41,17 @@ class Profile extends Model
         'village',
         'city',
         'state',
+        'father_name',
+        'father_occupation',
+        'mother_name',
+        'mother_occupation',
+        'mothers_father_name',
+        'mother_village',
+        'mother_city',
+        'siblings',
+        'number_of_brothers',
+        'number_of_sisters',
+        'sibling_comment',
         // Other profile fields if required to add
     ];
 
@@ -96,6 +107,29 @@ class Profile extends Model
         }
 
         return $query->where($filters);
+    }
+
+    public function scopeFilterByWeight($query, $weight)
+    {
+        if ($weight) {
+            return $query->where('weight', '=', $weight);
+        }
+        return $query;
+    }
+
+    public function scopeFilterByHeight($query, $height)
+    {
+        if ($height) {
+            return $query->where('height', '=', $height);
+        }
+        return $query;
+    }
+    public function scopeFilterBy($query, $siblings)
+    {
+        if ($siblings) {
+            return $query->where('siblings', '=', $siblings);
+        }
+        return $query;
     }
 
     public function user()

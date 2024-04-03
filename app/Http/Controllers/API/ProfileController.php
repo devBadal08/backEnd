@@ -24,6 +24,9 @@ class ProfileController extends Controller
         $village = $request->query('village');
         $city = $request->query('city');
         $state = $request->query('state');
+        $weight = $request->query('weight');
+        $height = $request->query('height');
+        $siblings = $request->query('siblings');
         $searchTerm = $request->query('keyword');
 
         $profilesQuery = Profile::where('user_id', $manager->id)
@@ -49,6 +52,15 @@ class ProfileController extends Controller
         }
         if (isset($state) && !empty($state)) {
             $profilesQuery->filterByLocation($village, $city, $state);
+        }
+        if (isset($weight) && !empty($weight)) {
+            $profilesQuery->filterByWeight($weight);
+        }
+        if (isset($height) && !empty($height)) {
+            $profilesQuery->filterByHeight($height);
+        }
+        if (isset($siblings) && !empty($siblings)) {
+            $profilesQuery->filterByHeight($siblings);
         }
 
         return ProfileResource::collection($profilesQuery->paginate($perPage));
@@ -97,11 +109,6 @@ class ProfileController extends Controller
             return response()->json(['error' => 'Maximum limit reached for adding profiles under this manager.'], 403);
         }
 
-        // Calculate the age from DOB and Store it 
-        $dob = $request->dob;
-        $age = \Carbon\Carbon::parse($dob)->diff(\Carbon\Carbon::now())->format('%y');
-        $postParams['age'] = $age;
-
         //Store the image
         if (isset($request->image)) {
             $imageName = time() . '.' . $request->image->extension();
@@ -118,6 +125,7 @@ class ProfileController extends Controller
         $profile->phone = $request->phone;
         $profile->alt_phone = $request->alt_phone;
         $profile->dob = $request->dob;
+        $profile->age = \Carbon\Carbon::parse($request->dob)->age; // Calculate age from DOB and store it
         $profile->gender = $request->gender;
         $profile->username = $request->username;
         $profile->marital_status = $request->marital_status;
@@ -129,7 +137,26 @@ class ProfileController extends Controller
         $profile->hobbies = $request->hobbies;
         $profile->about_self = $request->about_self;
         $profile->about_job = $request->about_job;
-        // Set other profile fields from request
+        $profile->father_name = $request->father_name;
+        $profile->father_occupation = $request->father_occupation;
+        $profile->mother_name = $request->mother_name;
+        $profile->mother_occupation = $request->mother_occupation;
+        $profile->mothers_father_name = $request->mothers_father_name;
+        $profile->mother_village = $request->mother_village;
+        $profile->mother_city = $request->mother_city;
+
+        // If siblings information is provided, assign it to the profile
+        if ($request->has('siblings')) {
+            $profile->siblings = $request->siblings;
+            $profile->number_of_brothers = $request->number_of_brothers;
+            $profile->number_of_sisters = $request->number_of_sisters;
+        } else {
+            // If siblings information is not provided, set it to null
+            $profile->siblings = null;
+            $profile->number_of_brothers = null;
+            $profile->number_of_sisters = null;
+        }
+
         $profile->save();
         return new ProfileResource($profile);
     }
@@ -138,7 +165,8 @@ class ProfileController extends Controller
     public function profileUpdate(Request $request, $id)
     {
         $profile = auth()->user();
-        $emailValidation = ['email' => [
+        $emailValidation = [
+            'email' => [
                 'required',
                 'email',
                 Rule::unique('profiles')->ignore($id) //email validation
@@ -152,7 +180,6 @@ class ProfileController extends Controller
                 $emailValidation
             )
         );
-        
 
         if ($validator->fails()) {
             $response = [
@@ -189,7 +216,19 @@ class ProfileController extends Controller
             'hobbies'  => $request->hobbies,
             'about_self'  => $request->about_self,
             'about_job'  => $request->about_job,
+            'father_name'  => $request->father_name,
+            'father_occupation'  => $request->father_occupation,
+            'mother_name'  => $request->mother_name,
+            'mother_occupation'  => $request->mother_occupation,
+            'mothers_father_name'  => $request->mothers_father_name,
+            'mother_village'  => $request->mother_village,
+            'mother_city'  => $request->mother_city,
         ];
+
+        // Calculate the age from DOB and Store it 
+        $dob = $request->dob;
+        $age = \Carbon\Carbon::parse($dob)->diff(\Carbon\Carbon::now())->format('%y');
+        $postParams['age'] = $age;
 
         if (isset($request->image) && !empty($request->image)) {
             $imageName = time() . '.' . $request->image->extension();
@@ -197,8 +236,15 @@ class ProfileController extends Controller
             $postParams['image'] = $imageName;
         }
 
-        if ($request->has('password')) {
+        if (isset($request->password) && !empty($request->password)) {
             $profile->password = bcrypt($request->password);
+        }
+
+        // Check if siblings information is provided
+        if (isset($request->siblings) && !empty($request->siblings)) {
+            $postParams['siblings'] = $request->siblings;
+            $postParams['number_of_brothers'] = $request->number_of_brothers;
+            $postParams['number_of_sisters'] = $request->number_of_sisters;
         }
 
         $profile->update($postParams);
@@ -251,6 +297,17 @@ class ProfileController extends Controller
             'about_self' => 'required',
             'about_job' => 'required',
             'image' => 'nullable|mimes:jpeg,jpg,png,gif|max:500', //image validation
+            'father_name' => 'required',
+            'father_occupation' => 'required',
+            'mother_name' => 'required',
+            'mother_occupation' => 'required',
+            'mothers_father_name' => 'required',
+            'mother_village' => 'nullable',
+            'mother_city' => 'required',
+            'siblings' => 'sometimes|required|integer', // siblings is optional but if provided, number of brothers and sisters are required
+            'number_of_brothers' => 'required_with:siblings|integer',
+            'number_of_sisters' => 'required_with:siblings|integer',
+            'sibling_comment' => 'nullable',
         ];
     }
 }
