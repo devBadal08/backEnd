@@ -145,6 +145,7 @@ class ProfileController extends Controller
         $profile->mothers_father_name = $request->mothers_father_name;
         $profile->mother_village = $request->mother_village;
         $profile->mother_city = $request->mother_city;
+        $profile->sibling_comment = $request->sibling_comment;
 
         // If siblings information is provided, assign it to the profile
         if ($request->has('siblings')) {
@@ -225,6 +226,7 @@ class ProfileController extends Controller
             'mothers_father_name'  => $request->mothers_father_name,
             'mother_village'  => $request->mother_village,
             'mother_city'  => $request->mother_city,
+            'sibling_comment' =>$request->sibling_comment,
         ];
 
         // Calculate the age from DOB and Store it 
