@@ -60,8 +60,9 @@ class ProfileController extends Controller
             $profilesQuery->filterByHeight($height);
         }
         if (isset($siblings) && !empty($siblings)) {
-            $profilesQuery->filterByHeight($siblings);
+            $profilesQuery->filterBySiblings($siblings);
         }
+        
 
         return ProfileResource::collection($profilesQuery->paginate($perPage));
     }

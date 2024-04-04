@@ -124,7 +124,7 @@ class Profile extends Model
         }
         return $query;
     }
-    public function scopeFilterBy($query, $siblings)
+    public function scopeFilterBySiblings($query, $siblings)
     {
         if ($siblings) {
             return $query->where('siblings', '=', $siblings);
