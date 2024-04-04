@@ -62,7 +62,7 @@ class ProfileController extends Controller
         if (isset($siblings) && !empty($siblings)) {
             $profilesQuery->filterBySiblings($siblings);
         }
-        
+
 
         return ProfileResource::collection($profilesQuery->paginate($perPage));
     }
@@ -88,14 +88,17 @@ class ProfileController extends Controller
     public function store(Request $request)
     {
         $profile = new Profile;
-        $imageValidation = ['image' => 'required|mimes:jpeg,jpg,png,gif|max:500']; //image validation
-
+        $customValidation = [
+            'email' => 'required', //email validation
+            'image' => 'required|mimes:jpeg,jpg,png,gif|max:500', //image validation
+        ];
+       
         //vadlidation
         $validator = Validator::make(
             $request->all(),
             array_merge(
                 $this->getValidationRules(),
-                $imageValidation
+                $customValidation
             )
         );
 
@@ -227,7 +230,7 @@ class ProfileController extends Controller
             'mothers_father_name'  => $request->mothers_father_name,
             'mother_village'  => $request->mother_village,
             'mother_city'  => $request->mother_city,
-            'sibling_comment' =>$request->sibling_comment,
+            'sibling_comment' => $request->sibling_comment,
         ];
 
         // Calculate the age from DOB and Store it 
