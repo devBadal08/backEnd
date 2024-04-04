@@ -87,12 +87,14 @@ class ProfileController extends Controller
     public function store(Request $request)
     {
         $profile = new Profile;
+        $imageValidation = ['image' => 'required|mimes:jpeg,jpg,png,gif|max:500']; //image validation
 
         //vadlidation
         $validator = Validator::make(
             $request->all(),
             array_merge(
-                $this->getValidationRules()
+                $this->getValidationRules(),
+                $imageValidation
             )
         );
 
@@ -121,7 +123,6 @@ class ProfileController extends Controller
         $profile->middle_name = $request->middle_name;
         $profile->last_name = $request->last_name;
         $profile->email = $request->email;
-        $profile->password = bcrypt($request->password);
         $profile->phone = $request->phone;
         $profile->alt_phone = $request->alt_phone;
         $profile->dob = $request->dob;
@@ -165,19 +166,20 @@ class ProfileController extends Controller
     public function profileUpdate(Request $request, $id)
     {
         $profile = auth()->user();
-        $emailValidation = [
+        $customValidation = [
             'email' => [
                 'required',
                 'email',
                 Rule::unique('profiles')->ignore($id) //email validation
-            ]
+            ],
+            'image' => 'nullable|mimes:jpeg,jpg,png,gif|max:500', //image validation
         ];
         //vadlidation
         $validator = Validator::make(
             $request->all(),
             array_merge(
                 $this->getValidationRules(),
-                $emailValidation
+                $customValidation
             )
         );
 
@@ -236,10 +238,6 @@ class ProfileController extends Controller
             $postParams['image'] = $imageName;
         }
 
-        if (isset($request->password) && !empty($request->password)) {
-            $profile->password = bcrypt($request->password);
-        }
-
         // Check if siblings information is provided
         if (isset($request->siblings) && !empty($request->siblings)) {
             $postParams['siblings'] = $request->siblings;
@@ -284,8 +282,6 @@ class ProfileController extends Controller
             'gender' => 'required',
             'phone' => 'required|numeric|digits:10',
             'alt_phone' => 'nullable|numeric|digits:10',
-            'password' => 'nullable|confirmed|min:8', // Password is optional, but if provided, needs confirmation and minimum length
-            'password_confirmation' => 'nullable|required_with:password', // Confirmation required only if password is provided
             'username' => 'required',
             'marital_status' => 'required',
             'village' => 'required',
@@ -308,6 +304,31 @@ class ProfileController extends Controller
             'number_of_brothers' => 'required_with:siblings|integer',
             'number_of_sisters' => 'required_with:siblings|integer',
             'sibling_comment' => 'nullable',
+            // Add custom validation rule to ensure sum of brothers and sisters equals siblings
+            'number_of_brothers' => [
+                'required_with:siblings',
+                function ($attribute, $value, $fail) use ($isNew) {
+                    if ($isNew && request()->filled('siblings')) {
+                        $siblings = request('siblings');
+                        $totalBrothersAndSisters = request('number_of_brothers') + request('number_of_sisters');
+                        if ($siblings != $totalBrothersAndSisters) {
+                            $fail('The sum of number of brothers and number of sisters must equal the number of siblings.');
+                        }
+                    }
+                },
+            ],
+            'number_of_sisters' => [
+                'required_with:siblings',
+                function ($attribute, $value, $fail) use ($isNew) {
+                    if ($isNew && request()->filled('siblings')) {
+                        $siblings = request('siblings');
+                        $totalBrothersAndSisters = request('number_of_brothers') + request('number_of_sisters');
+                        if ($siblings != $totalBrothersAndSisters) {
+                            $fail('The sum of number of brothers and number of sisters must equal the number of siblings.');
+                        }
+                    }
+                },
+            ],
         ];
     }
 }
