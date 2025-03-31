@@ -58,15 +58,26 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
 
     //Routes for manager
 
-    Route::controller(ManagerController::class)->group(function () {
-        Route::get('managers', 'index');
-        Route::get('{id}/manager/edit', 'edit');
-        Route::post('manager/store', 'store');
-        Route::post('{id}/manager/update', 'update');
-        Route::post('{id}/manager/managerupdate', 'manager_update');
-        Route::post('{id}/manager/show', 'show');
-    });
-
+    // Route::controller(ManagerController::class)->group(function () {
+    //     Route::get('managers', 'index');
+    //     Route::get('{id}/manager/edit', 'edit');
+    //     Route::post('manager/store', 'store');
+    //     Route::post('{id}/manager/update', 'update');
+    //     Route::post('{id}/manager/managerupdate', 'manager_update');
+    //     Route::post('{id}/manager/show', 'show');
+    //     Route::delete('{id}/manager/delete', 'destroy');
+        
+    // });
+// Routes for manager
+Route::controller(ManagerController::class)->group(function () {
+    Route::get('managers', 'index');
+    Route::get('{id}/manager/edit', 'edit');
+    Route::post('manager/store', 'store');
+    Route::post('{id}/manager/update', 'update');
+    Route::post('{id}/manager/managerupdate', 'manager_update');
+    Route::post('{id}/manager/show', 'show');
+    Route::delete('{id}/manager/delete', 'destroy');
+});
     //Routes for profile 
     Route::controller(ProfileController::class)->group(function () {
         Route::get('{id}/profiles', 'index');

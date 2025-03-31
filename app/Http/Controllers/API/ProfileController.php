@@ -14,58 +14,58 @@ use Illuminate\Validation\Rule;
 class ProfileController extends Controller
 {
     // To list the all profile under a particular manager with educationk
-    public function index(Request $request, $id)
-    {
-        $manager = User::findOrFail($id);
-        $perPage = $request->query('per_page', 10);
-        $minAge = $request->query('min_age');
-        $birthYear = $request->query('birth_year');
-        $gender = $request->query('gender');
-        $village = $request->query('village');
-        $city = $request->query('city');
-        $state = $request->query('state');
-        $weight = $request->query('weight');
-        $height = $request->query('height');
-        $siblings = $request->query('siblings');
-        $searchTerm = $request->query('keyword');
+        public function index(Request $request, $id)
+        {
+            $manager = User::findOrFail($id);
+            $perPage = $request->query('per_page', 10);
+            $minAge = $request->query('min_age');
+            $birthYear = $request->query('birth_year');
+            $gender = $request->query('gender');
+            $village = $request->query('village');
+            $city = $request->query('city');
+            $state = $request->query('state');
+            $weight = $request->query('weight');
+            $height = $request->query('height');
+            $siblings = $request->query('siblings');
+            $searchTerm = $request->query('keyword');
 
-        $profilesQuery = Profile::where('user_id', $manager->id)
-            ->with('educations');
+            $profilesQuery = Profile::where('user_id', $manager->id)
+                ->with('educations');
 
-        if (isset($searchTerm) && !empty($searchTerm)) {
-            $profilesQuery->filterBySearch($searchTerm);
-        }
-        if (isset($minAge) && !empty($minAge)) {
-            $profilesQuery->filterByAge($minAge);
-        }
-        if (isset($birthYear) && !empty($birthYear)) {
-            $profilesQuery->filterByBirthYear($birthYear);
-        }
-        if (isset($gender) && !empty($gender)) {
-            $profilesQuery->filterByGender($gender);
-        }
-        if (isset($village) && !empty($village)) {
-            $profilesQuery->filterByLocation($village, $city, $state);
-        }
-        if (isset($city) && !empty($city)) {
-            $profilesQuery->filterByLocation($village, $city, $state);
-        }
-        if (isset($state) && !empty($state)) {
-            $profilesQuery->filterByLocation($village, $city, $state);
-        }
-        if (isset($weight) && !empty($weight)) {
-            $profilesQuery->filterByWeight($weight);
-        }
-        if (isset($height) && !empty($height)) {
-            $profilesQuery->filterByHeight($height);
-        }
-        if (isset($siblings) && !empty($siblings)) {
-            $profilesQuery->filterBySiblings($siblings);
-        }
+            if (isset($searchTerm) && !empty($searchTerm)) {
+                $profilesQuery->filterBySearch($searchTerm);
+            }
+            if (isset($minAge) && !empty($minAge)) {
+                $profilesQuery->filterByAge($minAge);
+            }
+            if (isset($birthYear) && !empty($birthYear)) {
+                $profilesQuery->filterByBirthYear($birthYear);
+            }
+            if (isset($gender) && !empty($gender)) {
+                $profilesQuery->filterByGender($gender);
+            }
+            if (isset($village) && !empty($village)) {
+                $profilesQuery->filterByLocation($village, $city, $state);
+            }
+            if (isset($city) && !empty($city)) {
+                $profilesQuery->filterByLocation($village, $city, $state);
+            }
+            if (isset($state) && !empty($state)) {
+                $profilesQuery->filterByLocation($village, $city, $state);
+            }
+            if (isset($weight) && !empty($weight)) {
+                $profilesQuery->filterByWeight($weight);
+            }
+            if (isset($height) && !empty($height)) {
+                $profilesQuery->filterByHeight($height);
+            }
+            if (isset($siblings) && !empty($siblings)) {
+                $profilesQuery->filterBySiblings($siblings);
+            }
 
 
-        return ProfileResource::collection($profilesQuery->paginate($perPage));
-    }
+            return ProfileResource::collection($profilesQuery->paginate($perPage));
+        }
 
     /**
      * Display the specified resource.

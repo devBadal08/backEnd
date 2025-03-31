@@ -106,11 +106,22 @@ class ManagerController extends Controller
         return new UserResource($manager);
     }
 
-    public function edit(Request $request, $id)
-    {
-        $manager = User::find($id);
-        return response()->json($manager);
+    // public function edit(Request $request, $id)
+    // {
+    //     $manager = User::find($id);
+    //     return response()->json($manager);
+    // }
+
+    public function edit($id)
+{
+    $manager = User::find($id);
+
+    if (!$manager) {
+        return response()->json(['error' => 'Manager not found'], 404);
     }
+
+    return response()->json($manager, 200);
+}
 
     // Manager updated by admin
     public function manager_update(Request $request, $id)
@@ -169,7 +180,28 @@ class ManagerController extends Controller
         $manager->update($postParams);
         return new UserResource($manager);
     }
+    public function destroy($id)
+    {
+        $manager = User::find($id);
+    
+        if (!$manager) {
+            return response()->json(['message' => 'Manager not found'], 404);
+        }
+    
+        $manager->delete();
+    
+        return response()->json(['message' => 'Manager deleted successfully']);
+    }
+    
 
+    public function getManagerCount()
+    {
+        $totalManagers = User::where('role', 'manager')->count(); // ✅ Filter by role
+        return response()->json([
+            'total_managers' => $totalManagers,
+        ]);
+    }
+    
     //Manager Update itself
     public function update(Request $request, $id)
     {
